@@ -1,0 +1,23 @@
+:root {
+    --main-color: rgb(230, 127, 100);
+    --main-fade-color: rgba(230, 127, 100, 0.5);
+    --input-fade-color: #dfe6f3bf;
+
+
+    --main-font-size: 14px;
+}
+
+*, :after, :before {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-margin-before: 0;
+    -webkit-margin-after: 0;
+    -webkit-padding-before: 0;
+    -webkit-padding-after: 0;
+    touch-action: pan-y; /*  适配移动端的移动  */
+}
+
+button{
+    cursor: pointer;
+}
