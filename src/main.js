@@ -6,6 +6,7 @@ import axios from 'axios'
 
 import '@/css/index.css'
 import '@/css/rewrite.less'
+import '@/utils/iconfont.js'
 
 import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.min.css'

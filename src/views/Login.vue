@@ -15,7 +15,8 @@
 </template>
 
 <script>
-import { login } from '@/api/user'
+import { mapMutations } from 'vuex'
+import { getToken, saveToken } from '@/utils/token'
 
 export default {
   name: 'Login',
@@ -26,6 +27,7 @@ export default {
     }
   },
   methods: {
+    ...mapMutations(['setUsername']),
     doLogin () {
       console.log('login')
       console.log(this.username)
@@ -37,13 +39,19 @@ export default {
         password
       }
       console.log(data)
+      console.log(getToken())
       this.$http.post('v1/api/user/login', data).then(res => {
-        console.log(res)
+        console.log(res.data)
         if (res.data.code === 100) {
           this.$message.success('登录成功')
-          this.$router.push('/')
+          this.setUsername(res.data.data.username)
+          console.log(res.data.data.uuid)
+          saveToken(res.data.data.uuid)
+          console.log(this.$route.path)
+          this.$router.push('/').catch(err=>{
+            console.log(err)
+          })
         } else {
-          this.username = ''
           this.password = ''
           this.$message.error('账号密码错误')
         }

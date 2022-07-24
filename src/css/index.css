@@ -2,6 +2,8 @@
     --main-color: rgb(230, 127, 100);
     --main-fade-color: rgba(230, 127, 100, 0.5);
     --input-fade-color: #dfe6f3bf;
+    --error-color: #ff4852d6;
+    --success-color: #4abc00d6;
 
 
     --main-font-size: 14px;
@@ -20,4 +22,12 @@
 
 button{
     cursor: pointer;
+}
+
+.icon {
+    width: 2em;
+    height: 2em;
+    vertical-align: -0.6em;
+    fill: currentColor;
+    overflow: hidden;
 }

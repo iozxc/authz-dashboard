@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import 'vuex'
 import axios from 'axios'
+import { getToken, removeToken } from '@/utils/token'
 
 Vue.use(VueRouter)
 
@@ -48,10 +49,20 @@ router.beforeEach((to, from, next) => {
     next()
     return
   }
-  axios.get('v1/api/user/check-login').then(res => {
+  let uuid = getToken()
+  if (!uuid) {
+    next('/login')
+    return
+  }
+  axios.get(`v1/api/user/check-login?uuid=${uuid}`).then(res => {
+    console.log(res.data)
+    console.log(res)
+    console.log(getToken())
     if (res.data.code === 100) {
       next()
     } else {
+      removeToken()
+      router.app.$options.store.commit('setUsername', null)
       next('/login')
     }
   })

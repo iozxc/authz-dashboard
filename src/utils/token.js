@@ -1,26 +1,12 @@
-// 保存token
-export function saveItem (name, token) {
-    window.localStorage.setItem(name, token)
-}
-
-// 获取token
-export function getItem (name) {
-    return window.localStorage.getItem(name)
-}
-
-export function getItemObj (name) {
-    let item = window.localStorage.getItem(name);
-    if (item) return JSON.parse(item);
-    return item;
+export function saveToken (token) {
+  window.localStorage.setItem('authz_db_uuid', token)
 }
 
 export function getToken () {
-    let token = getItemObj('authz_db_user_token');
-    if (token) return token.accessToken.tokenVal;
-    return null;
+  return window.localStorage.getItem('authz_db_uuid')
 }
 
 // 删除token
-export function removeItem (name) {
-    window.localStorage.removeItem(name)
+export function removeToken () {
+  window.localStorage.removeItem('authz_db_uuid')
 }
