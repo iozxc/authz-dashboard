@@ -28,6 +28,11 @@ const routes = [
     component: () => import(/* webpackChunkName: "apidocs" */ './views/ApiDocs'),
   },
   {
+    path: '/request',
+    name: 'Request',
+    component: () => import(/* webpackChunkName: "request" */ './views/Request'),
+  },
+  {
     path: '*',
     redirect: '/'
   }
@@ -59,10 +64,11 @@ router.beforeEach((to, from, next) => {
     console.log(res)
     console.log(getToken())
     if (res.data.code === 100) {
+      router.app.$options.store.commit('setUser', res.data.data)
       next()
     } else {
       removeToken()
-      router.app.$options.store.commit('setUsername', null)
+      router.app.$options.store.commit('setUser', null)
       next('/login')
     }
   })

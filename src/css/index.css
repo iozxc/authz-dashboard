@@ -20,7 +20,7 @@
     touch-action: pan-y; /*  适配移动端的移动  */
 }
 
-button{
+button {
     cursor: pointer;
 }
 
@@ -31,3 +31,9 @@ button{
     fill: currentColor;
     overflow: hidden;
 }
+
+.hover-hand {
+    cursor: pointer;
+}
+
+

@@ -7,7 +7,7 @@
           <span>use your account</span>
           <input type="text" v-model:value="username" placeholder="username"/>
           <input type="password" v-model:value="password" placeholder="password"/>
-          <button @click="doLogin">Login</button>
+          <button @click="doLogin" :disabled="waitLogin">{{ waitLogin ? 'Waiting...' : 'Login' }}</button>
         </div>
       </div>
     </div>
@@ -23,13 +23,20 @@ export default {
   data () {
     return {
       username: '',
-      password: ''
+      password: '',
+      waitLogin: false,
+      ok: false
     }
   },
   methods: {
-    ...mapMutations(['setUsername']),
+    ...mapMutations(['setUser']),
     doLogin () {
-      console.log('login')
+      if (this.waitLogin) {
+        this.$message.warning('waiting')
+        return
+      }
+      if (this.ok) return
+      this.waitLogin = true
       console.log(this.username)
       console.log(this.password)
       let username = this.username
@@ -43,18 +50,23 @@ export default {
       this.$http.post('v1/api/user/login', data).then(res => {
         console.log(res.data)
         if (res.data.code === 100) {
-          this.$message.success('登录成功')
-          this.setUsername(res.data.data.username)
+          this.$notification.success({
+            message: 'Successful: ' + username,
+            duration: 3
+          })
+          this.setUser(res.data.data.username)
           console.log(res.data.data.uuid)
           saveToken(res.data.data.uuid)
           console.log(this.$route.path)
-          this.$router.push('/').catch(err=>{
+          this.$router.push('/').catch(err => {
             console.log(err)
           })
+          this.ok = true
         } else {
           this.password = ''
-          this.$message.error('账号密码错误')
+          this.$message.error('Account password error')
         }
+        this.waitLogin = false
       })
 
     }
@@ -193,4 +205,9 @@ input:focus-within {
   z-index: 2;
 }
 
+@media screen and (max-width: 500px) {
+  .container {
+    width: 380px;
+  }
+}
 </style>

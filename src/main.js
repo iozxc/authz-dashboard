@@ -10,10 +10,8 @@ import '@/utils/iconfont.js'
 
 import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.min.css'
-import { IconFont } from '@/utils/common'
 
 Vue.use(Antd)
-Vue.component('icon-font', IconFont)
 
 Vue.config.productionTip = false
 axios.defaults.withCredentials = true
