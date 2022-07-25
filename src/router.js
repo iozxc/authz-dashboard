@@ -2,7 +2,8 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import 'vuex'
 import axios from 'axios'
-import { getToken, removeToken } from '@/utils/token'
+import { getToken, removeToken, saveToken } from '@/utils/token'
+import { prefix } from '@/utils/utils'
 
 Vue.use(VueRouter)
 
@@ -21,11 +22,6 @@ const routes = [
     path: '/home',
     name: 'Home',
     component: () => import(/* webpackChunkName: "index" */ './views/Home'),
-  },
-  {
-    path: '/api-docs',
-    name: 'ApiDOcs',
-    component: () => import(/* webpackChunkName: "apidocs" */ './views/ApiDocs'),
   },
   {
     path: '/request',
@@ -56,15 +52,16 @@ router.beforeEach((to, from, next) => {
   }
   let uuid = getToken()
   if (!uuid) {
+    uuid = to.query['uuid']
+  }
+  if (!uuid) {
     next('/login')
     return
   }
-  axios.get(`v1/api/user/check-login?uuid=${uuid}`).then(res => {
-    console.log(res.data)
-    console.log(res)
-    console.log(getToken())
+  axios.get(`${prefix}/user/check-login?uuid=${uuid}`).then(res => {
     if (res.data.code === 100) {
       router.app.$options.store.commit('setUser', res.data.data)
+      saveToken(uuid)
       next()
     } else {
       removeToken()

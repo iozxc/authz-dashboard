@@ -27,7 +27,7 @@
 			</div>
 			<router-link to="/login" v-if="!user">
 				<div class="user-info user-info-login">
-					<span class="login" style="color: rgba(0,0,0,0.75)">Login</span>
+					<span class="login" style="color: rgba(255,255,255,0.75)">Login</span>
 				</div>
 			</router-link>
 		</div>
@@ -57,7 +57,6 @@ export default {
   computed: {
     ...mapState(['user']),
     activeId () {
-      console.log(this.$route.path)
       if (this.$route.path === '/') return 1
       if (this.$route.path.startsWith('/request')) return 2
       if (this.$route.path.startsWith('/docs')) return 3
@@ -78,9 +77,7 @@ export default {
         message: 'Exit successful',
         duration: 1
       })
-      console.log('ok')
       this.$router.push('/login').catch(err => {
-        console.log(err)
       })
       this.setUser(null)
       removeToken()
@@ -158,13 +155,13 @@ export default {
 }
 
 .user-info-logout {
-  border: #a8b0c6 solid 1px;
-  background-color: #c3ddf7cf
+  border: #e0e1e0 solid 1px;
+  background-color: #e0e1e0a8;
 }
 
 .user-info-login {
-  border: var(--main-color) solid 1px;
-  background-color: var(--main-fade-color);
+  background-color: var(--main-color);
+  color: white;
 }
 
 .header:hover {

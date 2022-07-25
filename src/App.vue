@@ -20,9 +20,6 @@ export default {
   name: 'App',
   components: { HeaderLayout },
   mounted () {
-    this.$http.get('v1/api/echo?msg=ok').then(res => {
-      console.log(res.data)
-    })
   }
 }
 </script>

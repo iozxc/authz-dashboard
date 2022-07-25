@@ -36,4 +36,10 @@ button {
     cursor: pointer;
 }
 
+.not-allowed {
+    cursor: not-allowed;
+}
 
+.allowed {
+    cursor: pointer;
+}

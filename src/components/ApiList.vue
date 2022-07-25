@@ -41,7 +41,7 @@
                                style="background: #f7f7f7;float: right;">
                 {{ getPath(v11).requireLogin ? 'Require Login' : 'Not Login' }}
               </a-checkable-tag>
-              <card :path="getPath(v11)">
+              <card :path="getPath(v11)" :rateLimit="rateLimit(v11)">
               </card>
             </div>
           </a-collapse-panel>
@@ -85,13 +85,15 @@ export default {
   },
   methods: {
     changeActivekey (key) {
-      console.log(key)
     },
     handleChange (v) {
       this.getPath(v).requireLogin !== this.getPath(v).requireLogin // axios
     },
     hasRateLimit (v) {
       return this.docs.rateLimit[v.path] && this.docs.rateLimit[v.path][v.method]
+    },
+    rateLimit (v) {
+      return this.hasRateLimit(v) ? this.docs.rateLimit[v.path][v.method] : null
     },
     hasAuth (v) {
       return this.getPath(v).auth

@@ -17,6 +17,7 @@
 <script>
 import { mapMutations } from 'vuex'
 import { getToken, saveToken } from '@/utils/token'
+import { prefix } from '@/utils/utils'
 
 export default {
   name: 'Login',
@@ -37,29 +38,21 @@ export default {
       }
       if (this.ok) return
       this.waitLogin = true
-      console.log(this.username)
-      console.log(this.password)
       let username = this.username
       let password = this.password
       let data = {
         username,
         password
       }
-      console.log(data)
-      console.log(getToken())
-      this.$http.post('v1/api/user/login', data).then(res => {
-        console.log(res.data)
+      this.$http.post(`${prefix}/user/login`, data).then(res => {
         if (res.data.code === 100) {
           this.$notification.success({
             message: 'Successful: ' + username,
             duration: 3
           })
           this.setUser(res.data.data.username)
-          console.log(res.data.data.uuid)
           saveToken(res.data.data.uuid)
-          console.log(this.$route.path)
           this.$router.push('/').catch(err => {
-            console.log(err)
           })
           this.ok = true
         } else {

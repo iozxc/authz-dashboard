@@ -1,6 +1,7 @@
 <template>
   <div class="card">
-    {{path}}
+    {{ path }}
+    {{ rateLimit }}
   </div>
 </template>
 
@@ -10,7 +11,10 @@ export default {
   props: {
     path: {
       type: Object
-    }
+    },
+    rateLimit: {
+      type: Object
+    },
   },
   data () {
     return {}
@@ -20,6 +24,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.card{
+.card {
 }
 </style>

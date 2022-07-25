@@ -2,6 +2,7 @@
 module.exports = {
   publicPath: './',
   outputDir: 'dist',
+  assetsDir: 'authz-dashboard',
   productionSourceMap: false,
 
   pluginOptions: {
@@ -16,14 +17,14 @@ module.exports = {
   devServer: {
     open: true,
     proxy: {
-      '/v1/api': {
-        target: `http://localhost:9090/api/authz-dashboard/v1/api`,
+      '/authz-api/v1': {
+        target: `http://localhost:9090/api/authz-api/v1`,
         changeOrigin: true,
         ws: true,
         secure: false,
         logLevel: 'debug',
         pathRewrite: {
-          '^/v1/api': '',
+          '^/authz-api/v1': '',
         },
       },
     }

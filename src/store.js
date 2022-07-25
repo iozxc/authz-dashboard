@@ -5,11 +5,15 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    user: null
+    user: null,
+    currentServer: {}
   },
   mutations: {
     setUser (state, value) {
       state.user = value
+    },
+    setServer (state, value) {
+      state.currentServer = value
     },
   },
   actions: {},
