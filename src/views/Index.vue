@@ -15,14 +15,17 @@
           </a>
         </h6>
       </div>
+      <h5>license:</h5>
+      <div style="margin-left: 10px">
+        <h6>{{ docs.info.license.name }} :
+          <a class="license-url" target="_blank" :href="docs.info.license.url">
+            {{ docs.info.license.url }}
+          </a>
+        </h6>
+      </div>
       <h5>description:</h5>
       <div style="margin-left: 10px">
         <div>{{ docs.info.description }}</div>
-      </div>
-      <h5>license:</h5>
-      <div style="margin-left: 10px">
-        <div class="license-name">{{ docs.info.license.name }}</div>
-        <a class="license-url" target="_blank" :href="docs.info.license.url">{{ docs.info.license.url }}</a>
       </div>
     </div>
     <div class="info-header">

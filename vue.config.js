@@ -2,7 +2,7 @@
 module.exports = {
   publicPath: './',
   outputDir: 'dist',
-  assetsDir: 'authz-dashboard',
+  assetsDir: 'authz-dashboard-static',
   productionSourceMap: false,
 
   pluginOptions: {

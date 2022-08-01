@@ -33,15 +33,18 @@
 
             </div>
             <div>
-              <a-tag v-if="hasAuth(v11)"
-                     style="float: right;background-color: var(--main-color) !important;cursor: unset;">
-                Auth
-              </a-tag>
-              <a-checkable-tag v-else v-model="getPath(v11).requireLogin" @change="handleChange(v11)"
-                               style="background: #f7f7f7;float: right;">
-                {{ getPath(v11).requireLogin ? 'Require Login' : 'Not Login' }}
-              </a-checkable-tag>
-              <card :path="getPath(v11)" :rateLimit="rateLimit(v11)">
+              <div class="p-tags">
+                <a-checkable-tag v-model="getPath(v11).requireLogin"
+                                 @change="handleChange(v11)"
+                                 style="background: #f7f7f7;margin-bottom: 5px; width: 90px;text-align: center;">
+                  {{ getPath(v11).requireLogin ? 'Require Login' : 'Not Login' }}
+                </a-checkable-tag>
+                <a-tag v-if="hasAuth(v11)"
+                       style="background-color: var(--main-color) !important;cursor: unset;margin-bottom: 5px;text-align: center;">
+                  Auth
+                </a-tag>
+              </div>
+              <card class="card-item div-text-scroll" :path="getPath(v11)" :rateLimit="rateLimit(v11)">
               </card>
             </div>
           </a-collapse-panel>
@@ -233,5 +236,19 @@ export default {
       font-weight: 500;
     }
   }
+
+  .p-tags {
+    float: right;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-items: center;
+  }
+}
+
+.card-item {
+  margin-right: 110px;
+  padding: 10px;
+  max-height: 300px;
 }
 </style>
