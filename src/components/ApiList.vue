@@ -120,7 +120,12 @@ export default {
 
       this.$http.post(api('/operate'), data).then(res => {
         if (res.data.code === 100) {
-          this.$message.success(`接口 : \< ${v.method} ${v.path} \> 登录权限已修改 : ${k ? "\< Login Required \>" : "\< No Login Required \>"}`)
+          this.$message.success(
+            <div style="margin-top: 10px">
+              <div>接口 :  {v.method} {v.path}</div>
+              <div>登录权限已修改 : {k ? " Login Required " : " No Login Required "}</div>
+            </div>
+          )
         } else {
           this.getPath(v).requireLogin = !k
           this.$message.success(`接口登录权限修改失败`)
@@ -341,7 +346,7 @@ export default {
   right: 18px;
   cursor: pointer;
   padding: 10px;
-  background-color: var(--button-color);
+  background-color: #e6e6e654;
   border-radius: 10px;
   box-shadow: var(--button-shadow-color);
 }
