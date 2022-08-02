@@ -34,6 +34,7 @@ export default {
       this.isBlur = false
     },
     inputBlur () {
+      this.$emit('blur')
       this.isBlur = true
     }
   }

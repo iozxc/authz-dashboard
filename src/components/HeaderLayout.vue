@@ -11,23 +11,24 @@
         <svg class="icon  router-icon" style="font-size: 15px" aria-hidden="true">
           <use xlink:href="#icon-API"></use>
          </svg>
-				Docs
+				{{ trans('文档') }}
 			</div>
 			<div class="menu-item hover-hand" :class="{'active':activeId===2}" @click="goRequest">
 				<svg class="icon router-icon" style="font-size: 16px" aria-hidden="true">
           <use xlink:href="#icon-request-map"></use>
          </svg>
-				Request
+
+        {{ trans('请求') }}
 			</div>
 		</div>
 		<div class="user-info-space">
 			<div class="user-info user-info-logout" @click="exit" v-if="user">
         <div style="margin-bottom: 2px">{{ user }}</div>
-				<span style="color: #0000004f">Exit</span>
+				<span style="color: #0000004f">{{ trans('退出') }}</span>
 			</div>
 			<router-link to="/login" v-if="!user">
 				<div class="user-info user-info-login">
-					<span class="login" style="color: rgba(255,255,255,0.75)">Login</span>
+					<span class="login" style="color: rgba(255,255,255,0.75)">{{ trans('登录') }}</span>
 				</div>
 			</router-link>
 		</div>
@@ -39,6 +40,7 @@
 <script>
 import { mapMutations, mapState } from 'vuex'
 import { removeToken } from '@/utils/token'
+import { trans } from '@/utils/tanslate'
 
 export default {
   name: 'HeaderLayout',
@@ -63,6 +65,7 @@ export default {
     },
   },
   methods: {
+    trans,
     ...mapMutations(['setUser']),
     goDocs () {
       this.$router.push('/').catch(err => {
@@ -175,7 +178,8 @@ export default {
   margin-left: auto;
   padding: 0 15px;
   font-size: 20px;
-  .active{
+
+  .active {
     color: #ce7e49;
   }
 }

@@ -3,11 +3,11 @@
     <div class="container" id="container">
       <div class="form-container sign-in-container">
         <div class="form">
-          <h1>Authz Dashboard</h1>
-          <span>use your account</span>
+          <h1></h1>
+          <span> {{ trans('使用你的账户') }} </span>
           <input type="text" v-model:value="username" placeholder="username"/>
           <input type="password" v-model:value="password" placeholder="password"/>
-          <button @click="doLogin" :disabled="waitLogin">{{ waitLogin ? 'Waiting...' : 'Login' }}</button>
+          <button @click="doLogin" :disabled="waitLogin">{{ waitLogin ? trans('等待中...') : trans('登录') }}</button>
         </div>
       </div>
     </div>
@@ -16,8 +16,9 @@
 
 <script>
 import { mapMutations } from 'vuex'
-import { getToken, saveToken } from '@/utils/token'
-import { prefix } from '@/utils/utils'
+import { prefix } from '@/utils/api'
+import { trans } from '@/utils/tanslate'
+import { saveToken } from '@/utils/token'
 
 export default {
   name: 'Login',
@@ -30,10 +31,11 @@ export default {
     }
   },
   methods: {
+    trans,
     ...mapMutations(['setUser']),
     doLogin () {
       if (this.waitLogin) {
-        this.$message.warning('waiting')
+        this.$message.warning(trans('等待中...'))
         return
       }
       if (this.ok) return
@@ -47,7 +49,7 @@ export default {
       this.$http.post(`${prefix}/user/login`, data).then(res => {
         if (res.data.code === 100) {
           this.$notification.success({
-            message: 'Successful: ' + username,
+            message: `${trans('登录成功')}:  ${username}`,
             duration: 3
           })
           this.setUser(res.data.data.username)
@@ -57,9 +59,11 @@ export default {
           this.ok = true
         } else {
           this.password = ''
-          this.$message.error('Account password error')
+          this.$message.error(trans('密码错误'))
         }
         this.waitLogin = false
+      }).catch(e => {
+        this.$error(trans('服务器异常'))
       })
 
     }

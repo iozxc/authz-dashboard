@@ -77,20 +77,24 @@ export default {
   methods: {
     edit (v1) {
       this.$set(this.items[this.modify[0]], this.modify[1], v1)
+      this.$forceUpdate()
     },
     insert (i) {
       console.log('insert')
       console.log(i)
       this.$set(this.items[i], 0, null)
+      this.$forceUpdate()
     },
     orAdd () {
-      console.log(this.items)
+
       // if (!this.items) this.items = []
       this.$set(this.items, this.items.length, [])
+      this.$forceUpdate()
     },
     andAdd (b, i) {
       if (b) {
         this.$set(this.items[i], this.items[i].length, '')
+        this.$forceUpdate()
       }
     },
     modifyStart (i) {
@@ -98,16 +102,15 @@ export default {
     },
     close (index1, index2) {
       this.$delete(this.items[index1], index2)
+      this.$forceUpdate()
     },
     closeOr (index1) {
       this.$delete(this.items, index1)
+      this.$forceUpdate()
     },
     deleteAll () {
       this.items.splice(0, this.items.length)
-    },
-    save (index1, index2) {
-      console.log(index1, index2)
-      console.log(this.items[index1][index2])
+      this.$forceUpdate()
     }
   }
 }

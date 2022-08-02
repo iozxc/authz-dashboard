@@ -7,5 +7,3 @@ export const getUrl = function (v1, v2) {
     return `${h}://${v1}:${v2}`
   }
 }
-
-export const prefix = "authz-api/v1"

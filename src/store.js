@@ -6,6 +6,16 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     user: null,
+    docs: {
+      controllers: [],
+      paths: {},
+      rateLimit: {},
+      appVersionInfo: {},
+      info: {
+        license: {}
+      },
+      conns: []
+    },
     currentServer: {}
   },
   mutations: {
@@ -15,6 +25,9 @@ export default new Vuex.Store({
     setServer (state, value) {
       state.currentServer = value
     },
+    setDocs (state, value) {
+      state.docs = value
+    }
   },
   actions: {},
   modules: {}

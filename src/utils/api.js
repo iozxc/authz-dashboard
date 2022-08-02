@@ -1,4 +1,4 @@
-import { prefix } from '@/utils/utils'
+export const prefix = 'authz-api/v1'
 import { getToken } from '@/utils/token'
 
 export function api (path) {

@@ -59,8 +59,9 @@
 import ApiList from '@/components/ApiList'
 import { getToken } from '@/utils/token'
 import ServerCard from '@/components/ServerCard'
-import { mapMutations } from 'vuex'
+import { mapMutations, mapState } from 'vuex'
 import { api } from '@/utils/api'
+import { trans} from '@/utils/tanslate'
 
 export default {
   name: 'Index',
@@ -70,21 +71,11 @@ export default {
   },
   data () {
     return {
-      docs: {
-        controllers: [],
-        paths: {},
-        rateLimit: {},
-        appVersionInfo: {},
-        info: {
-          license: {}
-        },
-        conns: []
-      },
       load: false
     }
   },
   methods: {
-    ...mapMutations(['setServer']),
+    ...mapMutations(['setServer','setDocs']),
     getUrl (v1, v2) {
       let i = window.location.href.indexOf(':')
       let h = window.location.href.substring(0, i)
@@ -96,6 +87,7 @@ export default {
     }
   },
   computed: {
+    ...mapState(['docs']),
     token () {
       return getToken()
     },
@@ -117,9 +109,11 @@ export default {
   },
   mounted () {
     this.$http.get(api('/docs')).then(res => {
-      this.docs = res.data
+      this.setDocs(res.data)
       this.setServer(this.docs.appVersionInfo)
       this.load = true
+    }).catch(e=>{
+      this.$error(trans("token 过期, 请重新登录"))
     })
   }
 }
@@ -163,7 +157,19 @@ export default {
   }
 }
 
-@media screen and (max-width: 500px) {
+@media screen and (max-width: 800px) {
+  #index {
+    padding: 15px;
+  }
+}
+
+@media screen and (max-width: 700px) {
+  #index {
+    padding: 10px;
+  }
+}
+
+@media screen and (max-width: 600px) {
   #index {
     padding: 5px;
   }

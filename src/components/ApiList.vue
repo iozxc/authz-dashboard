@@ -23,7 +23,7 @@
                 <svg class="icon" aria-hidden="true" v-if="hasAuth(v11)">
                   <use xlink:href="#icon-menu_rolepermiss"></use>
                 </svg>
-                <svg class="icon" aria-hidden="true" v-if="hasRateLimit(v11)">
+                <svg class="icon" aria-hidden="true" v-if="hasRateLimitR(v11)">
                   <use xlink:href="#icon-rate"></use>
                 </svg>
                 <svg class="icon" aria-hidden="true" v-if="hasRequireLogin(v11)">
@@ -45,7 +45,7 @@
                                  v-else
                                  @change="handleChange(v11)"
                                  style="margin-bottom: 5px; width: 120px;text-align: center;">
-                  {{ getPath(v11).requireLogin ? 'Login Required' : 'No Login Required' }}
+                  {{ hasRequireLogin(v11) ? 'Login Required' : 'No Login Required' }}
                 </a-checkable-tag>
                 <a-tag v-if="hasAuth(v11)"
                        style="background-color: var(--main-color) !important; color: white;
@@ -53,17 +53,53 @@
                   Auth
                 </a-tag>
 
+                <a-tag v-if="!hasRateLimit(v11)" @click="addRateLimit(v11)"
+                       style="background-color: #eacc6a !important; color: #090808;
+                       float: right;
+                       cursor: pointer;margin-bottom: 5px;text-align: center;">
+                  添加 RateLimit
+                </a-tag>
+                  <a-tag @click="addAuth(v11)" v-if="!docs.paths[v11.path][v11.method].auth"
+                         style="background-color: var(--main-color) !important; color: white;
+                         float: right;
+                         cursor: pointer;margin-bottom: 5px;text-align: center;">
+                  添加 Auth
+                </a-tag>
               </div>
               <card class="card-item div-text-scroll"
-                    :path="docs.paths[v11.path][v11.method]"
-                    :rateLimit="rateLimit(v11)">
-              </card>
-              <div class="save" @click="save(v11)">
+                    v-if="docs.paths[v11.path][v11.method].auth"
+                    :path="docs.paths[v11.path][v11.method]">
+                </card>
+                <div class="delete delete-api-per"
+                     v-if="docs.paths[v11.path][v11.method].auth"
+                     @click="deleteAuth(v11)">
+                  <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-delete"></use>
+                  </svg>
+                </div>
+                <div class="save save-api-per"
+                     v-if="docs.paths[v11.path][v11.method].auth"
+                     @click="saveAuth(v11)">
+                  <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-save"></use>
+                  </svg>
+                </div>
+
+            </div>
+            <div class="card-item div-text-scroll ratelimit" v-if="hasRateLimit(v11)">
+              <rate-limit :rate-limit="rateLimit(v11)">
+              </rate-limit>
+              <div class="delete delete-rate-limit" @click="deleteRateLimit(v11)">
+                <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-delete"></use>
+                </svg>
+              </div>
+              <div class="save save-rate-limit" @click="saveRateLimit(v11)">
                 <svg class="icon" aria-hidden="true">
                   <use xlink:href="#icon-save"></use>
                 </svg>
               </div>
-          </div>
+            </div>
           </a-collapse-panel>
         </a-collapse>
       </a-collapse-panel>
@@ -72,13 +108,14 @@
 </template>
 
 <script>
-import { getToken } from '@/utils/token'
 import Card from '@/components/Card'
 import { api } from '@/utils/api'
+import RateLimit from '@/components/RateLimit'
 
 export default {
   name: 'ApiList',
   components: {
+    RateLimit,
     Card
   },
   props: {
@@ -105,53 +142,118 @@ export default {
     }
   },
   methods: {
-    changeActiveKey (key) {
-    },
-    handleChange (v) {
-      this.getPath(v).requireLogin !== this.getPath(v).requireLogin // axios
+    deleteRateLimit (v) {
+      this.$confirm({
+        title: '确认删除RateLimit?',
+        content: h => <div style="color:red;">删除后接口的请求速率将不做保护</div>,
+        onOk: () => {
+          this.$delete(this.docs.rateLimit[v.path], v.method)
+          if (this.docs.rateLimit[v.path].length === 0) {
+            this.$delete(this.docs.rateLimit, v.path)
+          }
+          let data = {
+            operate: 'delete',
+            target: 'rate',
+            api: v.path,
+            method: v.method
+          }
 
-      let k = this.getPath(v).requireLogin
+          this.$http.post(api('/operate'), data).then(res => {
+            if (res.data.code === 100) {
+              this.$message.success(
+                <div style="margin-top: 10px">
+                  <div>接口 : {v.method} {v.path}</div>
+                  <div>速率权限删除成功</div>
+                </div>
+              )
+            } else {
+              this.$message.error(`删除失败，网络异常`)
+            }
+          })
+
+        }
+      })
+    },
+    saveRateLimit (v) {
+      let rateLimit = this.rateLimit(v)
       let data = {
-        'target': 'login',
-        'method': v.method,
-        'api': v.path,
-        'value': k
+        operate: 'update',
+        target: 'rate',
+        api: v.path,
+        method: v.method,
+        rateLimit
       }
 
       this.$http.post(api('/operate'), data).then(res => {
         if (res.data.code === 100) {
+          this.getPath(v).hasRateLimit = true
+          this.docs.rateLimit[v.path][v.method] = res.data.data.rateLimit
           this.$message.success(
             <div style="margin-top: 10px">
-              <div>接口 :  {v.method} {v.path}</div>
-              <div>登录权限已修改 : {k ? " Login Required " : " No Login Required "}</div>
+              <div>接口 : {v.method} {v.path}</div>
+              <div>速率权限已修改</div>
             </div>
           )
         } else {
-          this.getPath(v).requireLogin = !k
-          this.$message.success(`接口登录权限修改失败`)
+          this.$message.error(`修改失败`)
         }
       })
+    },
+    addRateLimit (v) {
+      if (!this.docs.rateLimit[v.path]) {
+        this.docs.rateLimit[v.path] = {}
+      }
+      this.docs.rateLimit[v.path][v.method] = {
+        window: 10000,
+        maxRequests: 3,
+        minInterval: 0,
+        checkType: 'ip',
+        punishmentTime: [
+          3000,
+          5000,
+          10000
+        ]
+      }
+      this.$forceUpdate()
+    },
+    deleteAuth (v) {
+      this.$confirm({
+        title: '确认删除 Auth ?',
+        content: h => <div style="color:red;">删除后的接口将不做权限保护</div>,
+        onOk: () => {
+          this.$delete(this.docs.paths[v.path][v.method], 'auth')
+          this.docs.paths[v.path][v.method].isAuth = false
+          let data = {
+            operate: 'delete',
+            target: 'api',
+            api: v.path,
+            method: v.method
+          }
 
+          this.$http.post(api('/operate'), data).then(res => {
+            if (res.data.code === 100) {
+              this.$message.success(
+                <div style="margin-top: 10px">
+                  <div>接口 : {v.method} {v.path}</div>
+                  <div>API权限删除成功</div>
+                </div>
+              )
+            } else {
+              this.$message.error(`删除失败，网络异常`)
+            }
+          })
+
+        }
+      })
     },
-    hasRateLimit (v) {
-      return this.docs.rateLimit[v.path] && this.docs.rateLimit[v.path][v.method]
+    addAuth (v) {
+      console.log('addAuth')
+      this.docs.paths[v.path][v.method].auth = {}
+      console.log('= {}')
+      this.$forceUpdate()
+      console.log('$forceUpdate')
     },
-    rateLimit (v) {
-      return this.hasRateLimit(v) ? this.docs.rateLimit[v.path][v.method] : null
-    },
-    hasAuth (v) {
-      return this.getPath(v).isAuth
-    },
-    hasRequireLogin (v) {
-      return this.getPath(v).requireLogin
-    },
-    getPath (v) {
-      return this.docs.paths[v.path][v.method]
-    },
-    methodColorClass (method) {
-      return `api-method-${method.toLowerCase()}`
-    },
-    save (v) {
+    saveAuth (v) {
       let auth = this.docs.paths[v.path][v.method].auth
       let data = {
         'operate': 'update',
@@ -191,6 +293,53 @@ export default {
         }
         console.log(this.docs.paths[v.path][v.method])
       })
+    },
+    changeActiveKey (key) {
+    },
+    handleChange (v) {
+      let k = this.hasRequireLogin(v)
+      let data = {
+        'target': 'login',
+        'method': v.method,
+        'api': v.path,
+        'value': k
+      }
+
+      this.$http.post(api('/operate'), data).then(res => {
+        if (res.data.code === 100) {
+          this.$message.success(
+            <div style="margin-top: 10px">
+              <div>接口 : {v.method} {v.path}</div>
+              <div>登录权限已修改 : {k ? ' Login Required ' : ' No Login Required '}</div>
+            </div>
+          )
+        } else {
+          this.getPath(v).requireLogin = !k
+          this.$message.error(`接口登录权限修改失败`)
+        }
+      })
+
+    },
+    hasRateLimit (v) {
+      return this.docs.rateLimit[v.path] && this.docs.rateLimit[v.path][v.method]
+    },
+    hasRateLimitR (v) {
+      return this.getPath(v).hasRateLimit
+    },
+    rateLimit (v) {
+      return this.hasRateLimit(v) ? this.docs.rateLimit[v.path][v.method] : null
+    },
+    hasAuth (v) {
+      return this.getPath(v).isAuth
+    },
+    hasRequireLogin (v) {
+      return this.getPath(v).requireLogin
+    },
+    getPath (v) {
+      return this.docs.paths[v.path][v.method]
+    },
+    methodColorClass (method) {
+      return `api-method-${method.toLowerCase()}`
     },
     parsePath (path) {
       let _p = ''
@@ -320,9 +469,9 @@ export default {
   }
 
   .p-tags {
-    display: flex;
-    justify-items: center;
-    align-items: center;
+    //display: flex;
+    //justify-items: center;
+    //align-items: center;
     margin-bottom: 7px;
     padding: 10px 10px 4px 10px;
     background-color: var(--item-color);
@@ -333,7 +482,7 @@ export default {
 
 .card-item {
   padding: 20px;
-  max-height: 300px;
+  max-height: 400px;
   background-color: var(--item-color);
   box-shadow: var(--item-shadow);
   border-radius: 10px;
@@ -342,13 +491,51 @@ export default {
 
 .save {
   position: absolute;
-  bottom: 15px;
   right: 18px;
   cursor: pointer;
   padding: 10px;
   background-color: #e6e6e654;
   border-radius: 10px;
   box-shadow: var(--button-shadow-color);
+}
+
+.delete {
+  position: absolute;
+  right: 80px;
+  bottom: 14px;
+  cursor: pointer;
+  padding: 10px;
+  background-color: #ff000099;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(185, 37, 37, 0.21);
+}
+
+.delete-rate-limit {
+
+}
+
+.save-api-per {
+  bottom: 15px;
+}
+
+.delete-api-per {
+
+}
+
+.save-rate-limit {
+  bottom: 15px;
+}
+
+.ratelimit {
+  margin-top: 7px;
+  user-select: none;
+}
+
+@media screen and (max-width: 765px) {
+  .save-rate-limit {
+    top: 15px;
+    bottom: unset;
+  }
 }
 
 @media screen and (max-width: 500px) {

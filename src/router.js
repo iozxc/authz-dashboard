@@ -3,7 +3,7 @@ import VueRouter from 'vue-router'
 import 'vuex'
 import axios from 'axios'
 import { getToken, removeToken, saveToken } from '@/utils/token'
-import { prefix } from '@/utils/utils'
+import { prefix } from '@/utils/api'
 
 Vue.use(VueRouter)
 

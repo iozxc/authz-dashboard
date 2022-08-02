@@ -14,14 +14,16 @@
           </svg>
            require
          </h4>
-         <and-or-select :items="path.auth.requireRoles"></and-or-select>
+         <and-or-select class="aos"
+                        :items="path.auth.requireRoles"></and-or-select>
          <h4 class="exclude">
            <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-exclude"></use>
           </svg>
            exclude
          </h4>
-         <and-or-select :items="path.auth.excludeRoles"></and-or-select>
+         <and-or-select class="aos"
+                        :items="path.auth.excludeRoles"></and-or-select>
       </div>
     </div>
     <div>
@@ -38,14 +40,16 @@
           </svg>
            require
          </h4>
-        <and-or-select :items="path.auth.requirePermissions"></and-or-select>
+        <and-or-select class="aos"
+                       :items="path.auth.requirePermissions"></and-or-select>
          <h4 class="exclude">
            <svg class="icon" aria-hidden="true">
             <use xlink:href="#icon-p-exclude"></use>
           </svg>
            exclude
          </h4>
-        <and-or-select :items="path.auth.excludePermissions"></and-or-select>
+        <and-or-select class="aos"
+                       :items="path.auth.excludePermissions"></and-or-select>
       </div>
     </div>
   </div>
@@ -68,12 +72,10 @@ export default {
           excludePermissions: []
         }
       }
-    },
-    rateLimit: {
-      type: Object
-    },
+    }
   },
   created () {
+    console.log('create')
     if (!this.path.auth) {
       this.$set(this.path, 'auth', {
         requireRoles: [],
@@ -104,16 +106,22 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.aos {
+  margin-bottom: 10px;
+}
+
 .card {
   .card-item-sl {
     margin-left: 20px;
-    user-select: none
+    user-select: none;
+    padding: 20px;
   }
 
-  //.save{
-  //  position: absolute;
-  //  top: 0;
-  //  right: 0;
-  //}
+  @media screen and (max-width: 500px) {
+    .card-item-sl {
+      padding: 5px;
+    }
+  }
+
 }
 </style>

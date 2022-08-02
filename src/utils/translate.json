@@ -1,0 +1,32 @@
+{
+  "token 过期, 请重新登录": {
+    "en-US": "Token expired, please login again"
+  },
+  "密码错误": {
+    "en-US": "Password error"
+  },
+  "服务器异常": {
+    "en-US": "Server exception"
+  },
+  "登录成功": {
+    "en-US": "Success"
+  },
+  "等待中...": {
+    "en-US": "Waiting..."
+  },
+  "登录": {
+    "en-US": "Login"
+  },
+  "退出": {
+    "en-US": "Exit"
+  },
+  "使用你的账户": {
+    "en-US": "use your account"
+  } ,
+  "文档": {
+    "en-US": "Docs"
+  },
+  "请求": {
+    "en-US": "Request"
+  }
+}
