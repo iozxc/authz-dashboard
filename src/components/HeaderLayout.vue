@@ -156,7 +156,7 @@ export default {
 
 .user-info-logout {
   border: #e0e1e0 solid 1px;
-  background-color: #e0e1e0a8;
+  background-color: var(--button-color);
 }
 
 .user-info-login {
@@ -166,7 +166,7 @@ export default {
 
 .header:hover {
   background-color: #fff;
-  box-shadow: 0 2px 4px #00000014;
+  box-shadow: var(--button-shadow-color)
 }
 
 .header-menu {

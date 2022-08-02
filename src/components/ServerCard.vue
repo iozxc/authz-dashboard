@@ -79,7 +79,7 @@ export default {
   user-select: none;
   transition: all .2s ease-in-out;
   box-shadow: 0 2px 4px #0e0c0c38;
-  margin: 0 10px 10px;
+  margin: 10px;
 }
 
 .server-card:hover {

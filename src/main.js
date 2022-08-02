@@ -17,6 +17,11 @@ Vue.config.productionTip = false
 axios.defaults.withCredentials = true
 Vue.prototype.$http = axios
 
+// 屏蔽错误信息
+// Vue.config.errorHandler = () => null;
+// 屏蔽警告信息
+Vue.config.warnHandler = () => null;
+
 new Vue({
   router,
   store,

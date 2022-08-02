@@ -1,6 +1,6 @@
 <template>
   <div id="api-list">
-      <a-collapse @change="changeActivekey">
+      <a-collapse @change="changeActiveKey">
       <a-collapse-panel v-for="(v1,v2, index1) in docs.controllers" :key="index1"
                         :show-arrow="false"
                         style="background: rgb(247, 247, 247);border-radius: 4px;margin-bottom: 4px;">
@@ -13,7 +13,7 @@
             </span>
           </a-badge>
         </span>
-        <a-collapse @change="changeActivekey">
+        <a-collapse @change="changeActiveKey">
           <a-collapse-panel :key="index1+'-'+index2" v-for="(v11,index2) in v1" :show-arrow="false"
                             style="margin-bottom: 15px" :style="methodStyle[v11.method]">
             <div slot="header" class="collapse-header">
@@ -28,25 +28,42 @@
                 </svg>
                 <svg class="icon" aria-hidden="true" v-if="hasRequireLogin(v11)">
                   <use xlink:href="#icon-Login"></use>
-                 </svg>
+                </svg>
               </div>
 
             </div>
-            <div>
+            <div style="position: relative">
               <div class="p-tags">
+
+                <a-tag v-if="hasAuth(v11)"
+                       style="background-color: var(--success-color);user-select: none;
+                       color: white;
+                       margin-bottom: 5px; width: 120px;text-align: center;">
+                  {{ getPath(v11).requireLogin ? 'Login Required' : 'No Login Required' }}
+                </a-tag>
                 <a-checkable-tag v-model="getPath(v11).requireLogin"
+                                 v-else
                                  @change="handleChange(v11)"
-                                 style="background: #f7f7f7;margin-bottom: 5px; width: 90px;text-align: center;">
-                  {{ getPath(v11).requireLogin ? 'Require Login' : 'Not Login' }}
+                                 style="margin-bottom: 5px; width: 120px;text-align: center;">
+                  {{ getPath(v11).requireLogin ? 'Login Required' : 'No Login Required' }}
                 </a-checkable-tag>
                 <a-tag v-if="hasAuth(v11)"
-                       style="background-color: var(--main-color) !important;cursor: unset;margin-bottom: 5px;text-align: center;">
+                       style="background-color: var(--main-color) !important; color: white;
+                       cursor: unset;margin-bottom: 5px;text-align: center;">
                   Auth
                 </a-tag>
+
               </div>
-              <card class="card-item div-text-scroll" :path="getPath(v11)" :rateLimit="rateLimit(v11)">
+              <card class="card-item div-text-scroll"
+                    :path="docs.paths[v11.path][v11.method]"
+                    :rateLimit="rateLimit(v11)">
               </card>
-            </div>
+              <div class="save" @click="save(v11)">
+                <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-save"></use>
+                </svg>
+              </div>
+          </div>
           </a-collapse-panel>
         </a-collapse>
       </a-collapse-panel>
@@ -57,6 +74,7 @@
 <script>
 import { getToken } from '@/utils/token'
 import Card from '@/components/Card'
+import { api } from '@/utils/api'
 
 export default {
   name: 'ApiList',
@@ -87,10 +105,28 @@ export default {
     }
   },
   methods: {
-    changeActivekey (key) {
+    changeActiveKey (key) {
     },
     handleChange (v) {
       this.getPath(v).requireLogin !== this.getPath(v).requireLogin // axios
+
+      let k = this.getPath(v).requireLogin
+      let data = {
+        'target': 'login',
+        'method': v.method,
+        'api': v.path,
+        'value': k
+      }
+
+      this.$http.post(api('/operate'), data).then(res => {
+        if (res.data.code === 100) {
+          this.$message.success(`接口 : \< ${v.method} ${v.path} \> 登录权限已修改 : ${k ? "\< Login Required \>" : "\< No Login Required \>"}`)
+        } else {
+          this.getPath(v).requireLogin = !k
+          this.$message.success(`接口登录权限修改失败`)
+        }
+      })
+
     },
     hasRateLimit (v) {
       return this.docs.rateLimit[v.path] && this.docs.rateLimit[v.path][v.method]
@@ -99,7 +135,7 @@ export default {
       return this.hasRateLimit(v) ? this.docs.rateLimit[v.path][v.method] : null
     },
     hasAuth (v) {
-      return this.getPath(v).auth
+      return this.getPath(v).isAuth
     },
     hasRequireLogin (v) {
       return this.getPath(v).requireLogin
@@ -109,6 +145,47 @@ export default {
     },
     methodColorClass (method) {
       return `api-method-${method.toLowerCase()}`
+    },
+    save (v) {
+      let auth = this.docs.paths[v.path][v.method].auth
+      let data = {
+        'operate': 'update',
+        'target': 'api',
+        'method': v.method,
+        'api': v.path,
+        'role': {
+          'require': auth.requireRoles,
+          'exclude': auth.excludeRoles
+        },
+        'permission': {
+          'require': auth.requirePermissions,
+          'exclude': auth.excludePermissions
+        }
+      }
+      console.log(this.docs.paths[v.path][v.method])
+
+      this.$http.post(api('/operate'), data).then(res => {
+        console.log(res.data)
+        if (res.data.code === 100) {
+          let _path = res.data.data
+          if (!_path.auth) {
+            _path.auth = {
+              requireRoles: [],
+              requirePermissions: [],
+              excludeRoles: [],
+              excludePermissions: []
+            }
+          } else {
+            if (!_path.auth.requireRoles) _path.auth.requireRoles = []
+            if (!_path.auth.requirePermissions) _path.auth.requirePermissions = []
+            if (!_path.auth.excludeRoles) _path.auth.excludeRoles = []
+            if (!_path.auth.excludePermissions) _path.auth.excludePermissions = []
+          }
+          this.$set(this.docs.paths[v.path], v.method, _path)
+          this.$message.success('保存成功，已自动去重')
+        }
+        console.log(this.docs.paths[v.path][v.method])
+      })
     },
     parsePath (path) {
       let _p = ''
@@ -238,17 +315,47 @@ export default {
   }
 
   .p-tags {
-    float: right;
     display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-items: center;
+    align-items: center;
+    margin-bottom: 7px;
+    padding: 10px 10px 4px 10px;
+    background-color: var(--item-color);
+    box-shadow: var(--item-shadow);
+    border-radius: 10px;
   }
 }
 
 .card-item {
-  margin-right: 110px;
-  padding: 10px;
+  padding: 20px;
   max-height: 300px;
+  background-color: var(--item-color);
+  box-shadow: var(--item-shadow);
+  border-radius: 10px;
+  position: relative;
 }
+
+.save {
+  position: absolute;
+  bottom: 15px;
+  right: 18px;
+  cursor: pointer;
+  padding: 10px;
+  background-color: var(--button-color);
+  border-radius: 10px;
+  box-shadow: var(--button-shadow-color);
+}
+
+@media screen and (max-width: 500px) {
+  .save {
+    bottom: 10px;
+    right: 13px;
+    padding: 5px;
+  }
+
+  .card-item {
+    padding: 10px;
+  }
+}
+
 </style>

@@ -14,7 +14,7 @@
           </svg>
         </sup>
         <div class="s-delete" v-if="index_1===0">
-          <svg class="icon" aria-hidden="true" style="font-size: 12px;">
+          <svg class="icon" aria-hidden="true" @click="deleteAll" style="font-size: 12px;">
             <use xlink:href="#icon-delete"></use>
           </svg>
         </div>
@@ -22,7 +22,7 @@
              @click="insert(index_1)">
           INSERT
         </div>
-        <div v-for="(val,index_2) in item"
+        <div v-if="item" v-for="(val,index_2) in item"
              :key="index_1+'--'+index_2"
              class="role-perms-item"
              :style="index_2!==0?'margin-left: 0px':''"
@@ -45,7 +45,7 @@
           </div>
         </div>
       </div>
-      <div style="min-height: 44px;">
+      <div class="role-perms-items">
         <div class="and-or-select_or and-or-select_add" @click="orAdd">
           OR
         </div>
@@ -67,7 +67,6 @@ export default {
     },
   },
   mounted () {
-    console.log(this.items)
   },
   data () {
     return {
@@ -85,6 +84,8 @@ export default {
       this.$set(this.items[i], 0, null)
     },
     orAdd () {
+      console.log(this.items)
+      // if (!this.items) this.items = []
       this.$set(this.items, this.items.length, [])
     },
     andAdd (b, i) {
@@ -100,6 +101,9 @@ export default {
     },
     closeOr (index1) {
       this.$delete(this.items, index1)
+    },
+    deleteAll () {
+      this.items.splice(0, this.items.length)
     },
     save (index1, index2) {
       console.log(index1, index2)
@@ -224,7 +228,7 @@ export default {
   width: 36px;
   background-color: #e64b4be6;
   height: 32px;
-  cursor: default;
+  cursor: pointer;
 }
 
 

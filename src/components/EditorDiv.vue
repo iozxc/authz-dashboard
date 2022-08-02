@@ -1,14 +1,15 @@
 <template>
-  <div ref="editor" class="input-box" contenteditable="true" @input="inputText" @blur="inputBlur"
+  <div ref="editor" class="input-box" style="-webkit-user-select: auto" contenteditable="true" @input="inputText"
+       @blur="inputBlur"
        @focus="inputFocus"></div>
 </template>
 <script>
 export default {
   name: 'EditorDiv',
-  props: ['value', 'callback'], // 父组件v-model绑定的prop
+  props: ['value', 'callback'],
   data () {
     return {
-      isBlur: true, // 解决赋值时光标自动定位到起始位置
+      isBlur: true,
     }
   },
   watch: {
