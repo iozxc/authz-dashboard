@@ -37,7 +37,7 @@
 
                 <a-checkable-tag v-model="getPath(v11).requireLogin"
                                  v-if="!hasAuth(v11)&&!hasRateLimitR(v11)&&hasRequireLogin(v11)"
-                                 @change="handleChange(v11)"
+                                 @change="changeLogin(v11)"
                                  style="margin-bottom: 5px;color: #ffffff;width: 120px;text-align: center;">
                   Login Required
                 </a-checkable-tag>
@@ -58,6 +58,12 @@
                   RateLimit
                 </a-tag>
 
+                <a-tag @click="addParamAuth(v11)" v-if="!docs.paths[v11.path][v11.method].paramAuth"
+                       style="background-color: #61eaf6 !important; color: #151515;
+                         float: right;
+                         cursor: pointer;margin-bottom: 5px;text-align: center;">
+                  添加 【参数权限】
+                </a-tag>
                 <a-checkable-tag v-model="getPath(v11).requireLogin"
                                  v-if="!hasAuth(v11)&&!hasRateLimitR(v11)&&!hasRequireLogin(v11)"
                                  @change="handleChange(v11)"
@@ -70,34 +76,37 @@
                        cursor: pointer;margin-bottom: 5px;text-align: center;">
                   添加 【速率限制】
                 </a-tag>
-                  <a-tag @click="addAuth(v11)" v-if="!docs.paths[v11.path][v11.method].auth"
+                <a-tag @click="addAuth(v11)" v-if="!docs.paths[v11.path][v11.method].auth"
                          style="background-color: var(--main-color) !important; color: #151515;
                          float: right;
                          cursor: pointer;margin-bottom: 5px;text-align: center;">
                   添加 【接口权限】
                 </a-tag>
+
               </div>
-              <card class="card-item div-text-scroll"
+              <card class="card-item"
                     v-if="docs.paths[v11.path][v11.method].auth"
                     :path="docs.paths[v11.path][v11.method]">
                 </card>
-                <div class="delete delete-api-per"
-                     v-if="docs.paths[v11.path][v11.method].auth"
-                     @click="deleteAuth(v11)">
-                  <svg class="icon" aria-hidden="true">
-                    <use xlink:href="#icon-delete"></use>
-                  </svg>
-                </div>
-                <div class="save save-api-per"
+              <div class="delete delete-api-per"
+                   v-if="docs.paths[v11.path][v11.method].auth"
+                   @click="deleteAuth(v11)">
+                <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-delete"></use>
+                </svg>
+              </div>
+              <div class="save save-api-per"
                      v-if="docs.paths[v11.path][v11.method].auth"
                      @click="saveAuth(v11)">
                   <svg class="icon" aria-hidden="true">
                     <use xlink:href="#icon-save"></use>
                   </svg>
                 </div>
-
             </div>
-            <div class="card-item div-text-scroll ratelimit" v-if="hasRateLimit(v11)">
+            <div class="card-item param-auth" v-if="hasParamAuth(v11)">
+              <param-auth :param-auth="getPath(v11).paramAuth"></param-auth>
+            </div>
+            <div class="card-item ratelimit" v-if="hasRateLimit(v11)">
               <rate-limit :rate-limit="rateLimit(v11)">
               </rate-limit>
               <div class="delete delete-rate-limit" @click="deleteRateLimit(v11)">
@@ -121,10 +130,12 @@
 <script>
 import Card from '@/components/Card'
 import RateLimit from '@/components/RateLimit'
+import ParamAuth from '@/components/ParamAuth'
 
 export default {
   name: 'ApiList',
   components: {
+    ParamAuth,
     RateLimit,
     Card
   },
@@ -133,8 +144,10 @@ export default {
       type: Object,
       default: {
         controllers: [],
-        paths: {},
-        rateLimit: {}
+        paths: {
+          paramAuth: {},
+          rateLimit: {}
+        },
       },
     }
   },
@@ -152,6 +165,28 @@ export default {
     }
   },
   methods: {
+    hasRateLimit (v) {
+      return !!this.docs.paths[v.path][v.method].rateLimit
+    },
+    hasParamAuth (v) {
+      return !!this.docs.paths[v.path][v.method].paramAuth
+    },
+    hasRateLimitR (v) {
+      return this.getPath(v).hasRateLimit
+    },
+    rateLimit (v) {
+      return this.docs.paths[v.path][v.method].rateLimit
+    },
+    hasAuth (v) {
+      return this.getPath(v).hasAuth
+    },
+    hasRequireLogin (v) {
+      return this.getPath(v).requireLogin
+    },
+    getPath (v) {
+      return this.docs.paths[v.path][v.method]
+    },
+
     deleteRateLimit (v) {
       this.$confirm({
         title: '确认删除RateLimit?',
@@ -224,6 +259,7 @@ export default {
       }
       this.$forceUpdate()
     },
+
     deleteAuth (v) {
       this.$confirm({
         title: '确认删除 Auth ?',
@@ -299,9 +335,15 @@ export default {
         }
       })
     },
+
+    addParamAuth(v){
+      this.docs.paths[v.path][v.method].paramAuth = {}
+      this.$forceUpdate()
+    },
+
     changeActiveKey (key) {
     },
-    handleChange (v) {
+    changeLogin (v) {
       let k = this.hasRequireLogin(v)
       let data = {
         'target': 'login',
@@ -325,24 +367,7 @@ export default {
       })
 
     },
-    hasRateLimit (v) {
-      return !!this.docs.paths[v.path][v.method].rateLimit
-    },
-    hasRateLimitR (v) {
-      return this.getPath(v).hasRateLimit
-    },
-    rateLimit (v) {
-      return this.docs.paths[v.path][v.method].rateLimit
-    },
-    hasAuth (v) {
-      return this.getPath(v).hasAuth
-    },
-    hasRequireLogin (v) {
-      return this.getPath(v).requireLogin
-    },
-    getPath (v) {
-      return this.docs.paths[v.path][v.method]
-    },
+
     methodColorClass (method) {
       return `api-method-${method.toLowerCase()}`
     },
@@ -534,6 +559,10 @@ export default {
   user-select: none;
 }
 
+.param-auth{
+  margin-top: 7px;
+  user-select: none;
+}
 
 @media screen and (max-width: 765px) {
   .save-rate-limit {
