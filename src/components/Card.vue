@@ -75,7 +75,6 @@ export default {
     }
   },
   created () {
-    console.log('create')
     if (!this.path.auth) {
       this.$set(this.path, 'auth', {
         requireRoles: [],
@@ -98,8 +97,6 @@ export default {
   },
   methods: {
     add (v1, v2) {
-      console.log(v1)
-      console.log(v2)
     }
   }
 }
