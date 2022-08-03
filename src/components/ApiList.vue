@@ -35,35 +35,46 @@
             <div style="position: relative">
               <div class="p-tags">
 
-                <a-tag v-if="hasAuth(v11)"
+                <a-checkable-tag v-model="getPath(v11).requireLogin"
+                                 v-if="!hasAuth(v11)&&!hasRateLimitR(v11)&&hasRequireLogin(v11)"
+                                 @change="handleChange(v11)"
+                                 style="margin-bottom: 5px;color: #ffffff;width: 120px;text-align: center;">
+                  Login Required
+                </a-checkable-tag>
+                <a-tag v-if="hasAuth(v11)||hasRateLimitR(v11)"
                        style="background-color: var(--success-color);user-select: none;
                        color: white;
                        margin-bottom: 5px; width: 120px;text-align: center;">
                   {{ getPath(v11).requireLogin ? 'Login Required' : 'No Login Required' }}
                 </a-tag>
-                <a-checkable-tag v-model="getPath(v11).requireLogin"
-                                 v-else
-                                 @change="handleChange(v11)"
-                                 style="margin-bottom: 5px; width: 120px;text-align: center;">
-                  {{ hasRequireLogin(v11) ? 'Login Required' : 'No Login Required' }}
-                </a-checkable-tag>
                 <a-tag v-if="hasAuth(v11)"
                        style="background-color: var(--main-color) !important; color: white;
                        cursor: unset;margin-bottom: 5px;text-align: center;">
                   Auth
                 </a-tag>
+                <a-tag v-if="hasRateLimitR(v11)"
+                       style="background-color: #ffd866 !important; color: #1a1919;
+                       cursor: unset;margin-bottom: 5px;text-align: center;">
+                  RateLimit
+                </a-tag>
 
+                <a-checkable-tag v-model="getPath(v11).requireLogin"
+                                 v-if="!hasAuth(v11)&&!hasRateLimitR(v11)&&!hasRequireLogin(v11)"
+                                 @change="handleChange(v11)"
+                                 style="margin-bottom: 5px;color: #151515; float: right; width: 120px;text-align: center;">
+                  添加 【登录权限】
+                </a-checkable-tag>
                 <a-tag v-if="!hasRateLimit(v11)" @click="addRateLimit(v11)"
-                       style="background-color: #eacc6a !important; color: #090808;
+                       style="background-color: #efa411 !important; color: #151515;
                        float: right;
                        cursor: pointer;margin-bottom: 5px;text-align: center;">
-                  添加 RateLimit
+                  添加 【速率限制】
                 </a-tag>
                   <a-tag @click="addAuth(v11)" v-if="!docs.paths[v11.path][v11.method].auth"
-                         style="background-color: var(--main-color) !important; color: white;
+                         style="background-color: var(--main-color) !important; color: #151515;
                          float: right;
                          cursor: pointer;margin-bottom: 5px;text-align: center;">
-                  添加 Auth
+                  添加 【接口权限】
                 </a-tag>
               </div>
               <card class="card-item div-text-scroll"
@@ -109,7 +120,6 @@
 
 <script>
 import Card from '@/components/Card'
-import { api } from '@/utils/api'
 import RateLimit from '@/components/RateLimit'
 
 export default {
@@ -147,29 +157,30 @@ export default {
         title: '确认删除RateLimit?',
         content: h => <div style="color:red;">删除后接口的请求速率将不做保护</div>,
         onOk: () => {
-          this.$delete(this.docs.rateLimit[v.path], v.method)
-          if (this.docs.rateLimit[v.path].length === 0) {
-            this.$delete(this.docs.rateLimit, v.path)
-          }
-          let data = {
-            operate: 'delete',
-            target: 'rate',
-            api: v.path,
-            method: v.method
-          }
+          this.$delete(this.docs.paths[v.path][v.method], 'rateLimit')
 
-          this.$http.post(api('/operate'), data).then(res => {
-            if (res.data.code === 100) {
-              this.$message.success(
-                <div style="margin-top: 10px">
+          if (this.docs.paths[v.path][v.method].hasRateLimit) {
+            let data = {
+              operate: 'delete',
+              target: 'rate',
+              api: v.path,
+              method: v.method
+            }
+            this.$http.post('/operate', data).then(res => {
+              if (res.code === 100) {
+                this.$message.success(
+                  <div style="margin-top: 10px">
                   <div>接口 : {v.method} {v.path}</div>
                   <div>速率权限删除成功</div>
                 </div>
-              )
-            } else {
-              this.$message.error(`删除失败，网络异常`)
-            }
-          })
+                )
+              } else {
+                this.$message.error(`删除失败，网络异常`)
+              }
+            })
+          }
+
+          this.$set(this.docs.paths[v.path][v.method], 'hasRateLimit', false)
 
         }
       })
@@ -184,10 +195,10 @@ export default {
         rateLimit
       }
 
-      this.$http.post(api('/operate'), data).then(res => {
-        if (res.data.code === 100) {
-          this.getPath(v).hasRateLimit = true
-          this.docs.rateLimit[v.path][v.method] = res.data.data.rateLimit
+      this.$http.post('/operate', data).then(res => {
+        if (res.code === 100) {
+          this.$set(this.docs.paths[v.path][v.method], 'hasRateLimit', true)
+          this.docs.paths[v.path][v.method].rateLimit = res.data.rateLimit
           this.$message.success(
             <div style="margin-top: 10px">
               <div>接口 : {v.method} {v.path}</div>
@@ -200,10 +211,7 @@ export default {
       })
     },
     addRateLimit (v) {
-      if (!this.docs.rateLimit[v.path]) {
-        this.docs.rateLimit[v.path] = {}
-      }
-      this.docs.rateLimit[v.path][v.method] = {
+      this.docs.paths[v.path][v.method].rateLimit = {
         window: 10000,
         maxRequests: 3,
         minInterval: 0,
@@ -222,36 +230,36 @@ export default {
         content: h => <div style="color:red;">删除后的接口将不做权限保护</div>,
         onOk: () => {
           this.$delete(this.docs.paths[v.path][v.method], 'auth')
-          this.docs.paths[v.path][v.method].isAuth = false
-          let data = {
-            operate: 'delete',
-            target: 'api',
-            api: v.path,
-            method: v.method
-          }
 
-          this.$http.post(api('/operate'), data).then(res => {
-            if (res.data.code === 100) {
-              this.$message.success(
-                <div style="margin-top: 10px">
+          if (this.docs.paths[v.path][v.method].hasAuth) {
+            let data = {
+              operate: 'delete',
+              target: 'api',
+              api: v.path,
+              method: v.method
+            }
+            this.$http.post('/operate', data).then(res => {
+              if (res.code === 100) {
+                this.$message.success(
+                  <div style="margin-top: 10px">
                   <div>接口 : {v.method} {v.path}</div>
                   <div>API权限删除成功</div>
                 </div>
-              )
-            } else {
-              this.$message.error(`删除失败，网络异常`)
-            }
-          })
+                )
+              } else {
+                this.$message.error(`删除失败，网络异常`)
+              }
+            })
+          }
+
+          this.$set(this.docs.paths[v.path][v.method], 'hasAuth', false)
 
         }
       })
     },
     addAuth (v) {
-      console.log('addAuth')
       this.docs.paths[v.path][v.method].auth = {}
-      console.log('= {}')
       this.$forceUpdate()
-      console.log('$forceUpdate')
     },
     saveAuth (v) {
       let auth = this.docs.paths[v.path][v.method].auth
@@ -269,12 +277,10 @@ export default {
           'exclude': auth.excludePermissions
         }
       }
-      console.log(this.docs.paths[v.path][v.method])
 
-      this.$http.post(api('/operate'), data).then(res => {
-        console.log(res.data)
-        if (res.data.code === 100) {
-          let _path = res.data.data
+      this.$http.post('/operate', data).then(res => {
+        if (res.code === 100) {
+          let _path = res.data
           if (!_path.auth) {
             _path.auth = {
               requireRoles: [],
@@ -291,7 +297,6 @@ export default {
           this.$set(this.docs.paths[v.path], v.method, _path)
           this.$message.success('保存成功，已自动去重')
         }
-        console.log(this.docs.paths[v.path][v.method])
       })
     },
     changeActiveKey (key) {
@@ -305,8 +310,8 @@ export default {
         'value': k
       }
 
-      this.$http.post(api('/operate'), data).then(res => {
-        if (res.data.code === 100) {
+      this.$http.post('/operate', data).then(res => {
+        if (res.code === 100) {
           this.$message.success(
             <div style="margin-top: 10px">
               <div>接口 : {v.method} {v.path}</div>
@@ -321,16 +326,16 @@ export default {
 
     },
     hasRateLimit (v) {
-      return this.docs.rateLimit[v.path] && this.docs.rateLimit[v.path][v.method]
+      return !!this.docs.paths[v.path][v.method].rateLimit
     },
     hasRateLimitR (v) {
       return this.getPath(v).hasRateLimit
     },
     rateLimit (v) {
-      return this.hasRateLimit(v) ? this.docs.rateLimit[v.path][v.method] : null
+      return this.docs.paths[v.path][v.method].rateLimit
     },
     hasAuth (v) {
-      return this.getPath(v).isAuth
+      return this.getPath(v).hasAuth
     },
     hasRequireLogin (v) {
       return this.getPath(v).requireLogin
@@ -469,9 +474,7 @@ export default {
   }
 
   .p-tags {
-    //display: flex;
-    //justify-items: center;
-    //align-items: center;
+    min-height: 45px;
     margin-bottom: 7px;
     padding: 10px 10px 4px 10px;
     background-color: var(--item-color);
@@ -482,7 +485,7 @@ export default {
 
 .card-item {
   padding: 20px;
-  max-height: 400px;
+  //max-height: 400px;
   background-color: var(--item-color);
   box-shadow: var(--item-shadow);
   border-radius: 10px;
@@ -531,10 +534,15 @@ export default {
   user-select: none;
 }
 
+
 @media screen and (max-width: 765px) {
   .save-rate-limit {
     top: 15px;
     bottom: unset;
+  }
+
+  .delete-rate-limit {
+    right: 18px;
   }
 }
 

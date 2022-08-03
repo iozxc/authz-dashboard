@@ -16,7 +16,6 @@
 
 <script>
 import { mapMutations } from 'vuex'
-import { prefix } from '@/utils/api'
 import { trans } from '@/utils/tanslate'
 import { saveToken } from '@/utils/token'
 
@@ -46,14 +45,14 @@ export default {
         username,
         password
       }
-      this.$http.post(`${prefix}/user/login`, data).then(res => {
-        if (res.data.code === 100) {
+      this.$http.post('/user/login', data).then(res => {
+        if (res.code === 100) {
           this.$notification.success({
             message: `${trans('登录成功')}:  ${username}`,
             duration: 3
           })
-          this.setUser(res.data.data.username)
-          saveToken(res.data.data.uuid)
+          this.setUser(res.data.username)
+          saveToken(res.data.uuid)
           this.$router.push('/').catch(err => {
           })
           this.ok = true
@@ -62,8 +61,6 @@ export default {
           this.$message.error(trans('密码错误'))
         }
         this.waitLogin = false
-      }).catch(e => {
-        this.$error(trans('服务器异常'))
       })
 
     }

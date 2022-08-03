@@ -8,6 +8,9 @@
   "服务器异常": {
     "en-US": "Server exception"
   },
+  "服务器错误": {
+    "en-US": "Server exception"
+  },
   "登录成功": {
     "en-US": "Success"
   },
@@ -22,7 +25,7 @@
   },
   "使用你的账户": {
     "en-US": "use your account"
-  } ,
+  },
   "文档": {
     "en-US": "Docs"
   },

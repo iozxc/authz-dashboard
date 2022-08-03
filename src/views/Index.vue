@@ -60,7 +60,6 @@ import ApiList from '@/components/ApiList'
 import { getToken } from '@/utils/token'
 import ServerCard from '@/components/ServerCard'
 import { mapMutations, mapState } from 'vuex'
-import { api } from '@/utils/api'
 import { trans} from '@/utils/tanslate'
 
 export default {
@@ -108,12 +107,10 @@ export default {
     }
   },
   mounted () {
-    this.$http.get(api('/docs')).then(res => {
-      this.setDocs(res.data)
+    this.$http.get('/docs').then(res => {
+      this.setDocs(res)
       this.setServer(this.docs.appVersionInfo)
       this.load = true
-    }).catch(e=>{
-      this.$error(trans("token 过期, 请重新登录"))
     })
   }
 }

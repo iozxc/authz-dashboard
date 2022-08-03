@@ -35,8 +35,7 @@
         </a-col>
          <a-col :xs="24" :sm="24" :md="10" :lg="14" :xl="14">
           <div class="associated-patterns">
-            <h4 class="title">Associated Patterns 关联的路径</h4>
-            <!--            <div v-for="(v1,v2) in docs.paths">{{v2}}</div>-->
+            <h4 class="title">关联的路径（当此路径被封禁时，关联的路径也会封禁）</h4>
             <a-select
               mode="tags"
               :default-value="rateLimit.associatedPatterns"
@@ -52,7 +51,7 @@
         </a-col>
       </a-row>
       <div style="margin-right: 130px ">
-         <h4 class="title">惩罚等级对应时间【毫秒】</h4>
+         <h4 class="title">惩罚等级 & 封禁时间【毫秒】</h4>
          <div class="punishment-time scroll">
             <div class="punishment-time-item-i"
                  :key="'punishment-time-item-'+i"
@@ -216,6 +215,7 @@ export default {
   justify-items: center;
   align-items: center;
   padding: 10px;
+  margin-left: 100px;
 }
 
 .associated-patterns {
@@ -267,6 +267,13 @@ export default {
   left: -18px;
   cursor: pointer;
   width: 0px;
+}
+
+
+@media screen and (max-width: 900px) {
+  .punishment-time {
+    margin-left: 50px;
+  }
 }
 
 @media screen and (max-width: 767px) {

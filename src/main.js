@@ -7,7 +7,7 @@ import axios from 'axios'
 import '@/css/index.css'
 import '@/css/rewrite.less'
 import '@/utils/iconfont.js'
-
+import '@/utils/request.js'
 import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.min.css'
 
@@ -20,7 +20,7 @@ Vue.prototype.$http = axios
 // 屏蔽错误信息
 // Vue.config.errorHandler = () => null;
 // 屏蔽警告信息
-Vue.config.warnHandler = () => null;
+Vue.config.warnHandler = () => null
 
 new Vue({
   router,

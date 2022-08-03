@@ -18,7 +18,7 @@
                         :items="path.auth.requireRoles"></and-or-select>
          <h4 class="exclude">
            <svg class="icon" aria-hidden="true">
-            <use xlink:href="#icon-exclude"></use>
+            <use xlink:href="#icon-p-exclude"></use>
           </svg>
            exclude
          </h4>

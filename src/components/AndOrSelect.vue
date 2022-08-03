@@ -86,8 +86,6 @@ export default {
       this.$forceUpdate()
     },
     orAdd () {
-
-      // if (!this.items) this.items = []
       this.$set(this.items, this.items.length, [])
       this.$forceUpdate()
     },

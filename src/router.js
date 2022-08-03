@@ -58,9 +58,9 @@ router.beforeEach((to, from, next) => {
     next('/login')
     return
   }
-  axios.get(`${prefix}/user/check-login?uuid=${uuid}`).then(res => {
-    if (res.data.code === 100) {
-      router.app.$options.store.commit('setUser', res.data.data)
+  axios.get(`/user/check-login?uuid=${uuid}`).then(res => {
+    if (res.code === 100) {
+      router.app.$options.store.commit('setUser', res.data)
       saveToken(uuid)
       next()
     } else {
@@ -68,6 +68,10 @@ router.beforeEach((to, from, next) => {
       router.app.$options.store.commit('setUser', null)
       next('/login')
     }
+  }).catch(e=>{
+    removeToken()
+    router.app.$options.store.commit('setUser', null)
+    next('/login')
   })
 
 })
