@@ -3,7 +3,7 @@
 					 'scroll-top': isTop,'scroll-not-top': !isTop}">
 		<div class="logo">
 			<router-link to="/">
-				<img src="@/assets/img/authz.png" alt="omisheep" width="120" height="40">
+				<img style="-webkit-user-drag: none;" src="@/assets/img/authz.png" alt="omisheep" width="120" height="40">
 			</router-link>
 		</div>
 		<div class="header-menu" v-if="user">
@@ -131,6 +131,7 @@ export default {
 }
 
 .logo {
+  -webkit-user-drag: none;
   overflow: hidden;
   display: inline-block;
   cursor: pointer;

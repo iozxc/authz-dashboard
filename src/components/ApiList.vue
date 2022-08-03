@@ -58,7 +58,8 @@
                   RateLimit
                 </a-tag>
 
-                <a-tag @click="addParamAuth(v11)" v-if="!docs.paths[v11.path][v11.method].paramAuth"
+                <a-tag @click="addParamAuth(v11)"
+                       v-if="!docs.paths[v11.path][v11.method].paramAuth && Object.keys(docs.paths[v11.path][v11.method].paramInfo).length>0"
                        style="background-color: #61eaf6 !important; color: #151515;
                          float: right;
                          cursor: pointer;margin-bottom: 5px;text-align: center;">
@@ -104,7 +105,7 @@
                 </div>
             </div>
             <div class="card-item param-auth" v-if="hasParamAuth(v11)">
-              <param-auth :param-auth="getPath(v11).paramAuth"></param-auth>
+              <param-auth :path="getPath(v11)"></param-auth>
             </div>
             <div class="card-item ratelimit" v-if="hasRateLimit(v11)">
               <rate-limit :rate-limit="rateLimit(v11)">

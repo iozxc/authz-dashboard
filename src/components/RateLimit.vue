@@ -5,20 +5,22 @@
         <a-col :xs="24" :sm="24" :md="14" :lg="10" :xl="10">
          <h4 class="title">窗口大小【毫秒】</h4>
          <div class="rate-limit-item window">
-            <a-input v-model="rateLimit.window"
+            <a-input :value="window"
                      @change="onChangeWindow">
               <div slot="addonAfter">毫秒</div>
             </a-input>
           </div>
           <h4 class="title">窗口内最大请求数</h4>
           <div class="rate-limit-item max-requests">
-             <a-input v-model="rateLimit.maxRequests" @change="onChangeMaxRequests">
+             <a-input :value="maxRequests"
+                      @change="onChangeMaxRequests"
+                      @blur="onChangeMaxRequests">
                <div slot="addonAfter">次</div>
              </a-input>
           </div>
           <h4 class="title">最小间隔【毫秒】（若两次请求间隔低于此值，将拦截 - 0为不做限制）</h4>
           <div class="rate-limit-item min-interval">
-             <a-input v-model="rateLimit.minInterval" @change="onChangeMinInterval">
+             <a-input :value="minInterval" @change="onChangeMinInterval">
                <div slot="addonAfter">毫秒</div>
              </a-input>
           </div>
@@ -98,7 +100,10 @@ export default {
   data () {
     return {
       top: 10,
-      i: -1
+      i: -1,
+      window: 0,
+      minInterval: 0,
+      maxRequests: 0
     }
   },
   computed: {
@@ -113,8 +118,10 @@ export default {
       return arr
     }
   },
-  mounted () {
-
+  created () {
+    this.maxRequests = Number(this.rateLimit.maxRequests)
+    this.window = Number(this.rateLimit.window)
+    this.minInterval = Number(this.rateLimit.minInterval)
   },
   methods: {
     close (i) {
@@ -152,25 +159,28 @@ export default {
       this.rateLimit.associatedPatterns = value
     },
     onChangeMinInterval (v) {
-      if (isNaN(Number(this.rateLimit.minInterval))) {
-        this.rateLimit.minInterval = '0'
+      if (isNaN(Number(v.target.value))) {
+        this.minInterval = 0
       } else {
-        this.rateLimit.minInterval = Number(this.rateLimit.minInterval)
+        this.minInterval = Number(v.target.value)
       }
+      this.rateLimit.minInterval = this.minInterval
     },
     onChangeWindow (v) {
-      if (isNaN(Number(this.rateLimit.window))) {
-        this.rateLimit.window = '0'
+      if (isNaN(Number(v.target.value))) {
+        this.window = 0
       } else {
-        this.rateLimit.window = Number(this.rateLimit.window)
+        this.window = Number(v.target.value)
       }
+      this.rateLimit.window = this.window
     },
-    onChangeMaxRequests(v){
-      if (isNaN(Number(this.rateLimit.maxRequests))) {
-        this.rateLimit.maxRequests = '0'
+    onChangeMaxRequests (v) {
+      if (isNaN(Number(v.target.value))) {
+        this.maxRequests = 0
       } else {
-        this.rateLimit.maxRequests = Number(this.rateLimit.maxRequests)
+        this.maxRequests = Number(v.target.value)
       }
+      this.rateLimit.maxRequests = this.maxRequests
     }
   }
 }
