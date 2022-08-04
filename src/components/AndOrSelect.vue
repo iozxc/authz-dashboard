@@ -1,6 +1,6 @@
 <template>
   <div class="and-or-select">
-    <div class="requireRoles" ref="requireRoles">
+    <div class="items">
       <div v-if="items" v-for="(item,index_1) in items"
            :key="index_1"
            style="margin-bottom: 5px"
@@ -115,7 +115,8 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.requireRoles {
+.and-or-select {
+  margin: 5px;
 }
 
 .role-perms-items {
@@ -130,10 +131,10 @@ export default {
   justify-items: center;
   align-items: center;
   margin: 5px 5px 5px 15px;
+  padding: 3px;
 }
 
 .role-perms-item_first {
-  //margin-left: 45px;
 }
 
 .role-perms-item_val {

@@ -1,13 +1,7 @@
 <template>
-  <div>
-    <h3>Path Variable</h3>
-    <div>
-      <param-auth-value :param-info="path.paramInfo.pathVariable" v-model:value="path.paramAuth.pathVariable"></param-auth-value>
-    </div>
-    <h3>Request Param</h3>
-    <div>
-      <param-auth-value :param-info="path.paramInfo.requestParam" v-model:value="path.paramAuth.requestParam"></param-auth-value>
-    </div>
+  <div class="param-auth-page" :class="s?'compact-item':''">
+    <h2><span class="compact" @click="compact">参数权限</span></h2>
+    <param-auth-value :param-info="path.paramAuth"></param-auth-value>
   </div>
 </template>
 
@@ -29,13 +23,41 @@ export default {
       }
     }
   },
-  data () {
-    return {}
+  created () {
   },
-  methods: {}
+  data () {
+    return {
+      s: false
+    }
+  },
+  methods: {
+    compact () {
+      this.s = !this.s
+    },
+  }
 }
 </script>
 
 <style lang="less" scoped>
+
+.compact {
+  margin-bottom: 15px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.compact-item {
+  height: 26px;
+  overflow: hidden;
+}
+
+h2 {
+  //margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+//.param-auth-page {
+//  margin-bottom: 30px;
+//}
 
 </style>

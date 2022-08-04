@@ -1,5 +1,6 @@
 <template>
-  <div class="rate-limit">
+  <div class="rate-limit" :class="s?'compact-item':''">
+    <h2><span class="compact" @click="compact">速率限制</span></h2>
     <div>
       <a-row>
         <a-col :xs="24" :sm="24" :md="14" :lg="10" :xl="10">
@@ -103,7 +104,8 @@ export default {
       i: -1,
       window: 0,
       minInterval: 0,
-      maxRequests: 0
+      maxRequests: 0,
+      s: false
     }
   },
   computed: {
@@ -124,6 +126,9 @@ export default {
     this.minInterval = Number(this.rateLimit.minInterval)
   },
   methods: {
+    compact () {
+      this.s = !this.s
+    },
     close (i) {
       this.$delete(this.rateLimit.punishmentTime, i)
     },
@@ -279,6 +284,21 @@ export default {
   width: 0px;
 }
 
+.compact {
+  margin-bottom: 15px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.compact-item {
+  height: 30px;
+  overflow: hidden;
+}
+
+
+h2 {
+  margin-bottom: 15px;
+}
 
 @media screen and (max-width: 900px) {
   .punishment-time {

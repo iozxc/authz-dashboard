@@ -1,5 +1,6 @@
 <template>
-  <div ref="editor" class="input-box" style="-webkit-user-select: auto" contenteditable="true" @input="inputText"
+  <div ref="editor" class="input-box" style="-webkit-user-select: auto"
+       contenteditable="true" @input="inputText"
        @blur="inputBlur"
        @focus="inputFocus"></div>
 </template>

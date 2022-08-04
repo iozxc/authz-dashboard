@@ -21,13 +21,16 @@
               <div class="api-path">
                 <span v-html="parsePath(v11.path)"></span>
                 <svg class="icon" aria-hidden="true" v-if="hasAuth(v11)">
-                  <use xlink:href="#icon-menu_rolepermiss"></use>
+                  <use xlink:href="#icon-shenfenshibierenzheng"></use>
                 </svg>
                 <svg class="icon" aria-hidden="true" v-if="hasRateLimitR(v11)">
                   <use xlink:href="#icon-rate"></use>
                 </svg>
                 <svg class="icon" aria-hidden="true" v-if="hasRequireLogin(v11)">
-                  <use xlink:href="#icon-Login"></use>
+                  <use xlink:href="#icon-menu_rolepermiss"></use>
+                </svg>
+                <svg class="icon" aria-hidden="true" v-if="hasParamAuthR(v11)">
+                  <use xlink:href="#icon-param"></use>
                 </svg>
               </div>
 
@@ -36,52 +39,58 @@
               <div class="p-tags">
 
                 <a-checkable-tag v-model="getPath(v11).requireLogin"
+                                 :style="tagStyle"
                                  v-if="!hasAuth(v11)&&!hasRateLimitR(v11)&&hasRequireLogin(v11)"
                                  @change="changeLogin(v11)"
-                                 style="margin-bottom: 5px;color: #ffffff;width: 120px;text-align: center;">
+                                 style="background-color: #5ec940b8; color: #151515;width: 120px;text-align: center;">
                   Login Required
                 </a-checkable-tag>
                 <a-tag v-if="hasAuth(v11)||hasRateLimitR(v11)"
-                       style="background-color: var(--success-color);user-select: none;
-                       color: white;
-                       margin-bottom: 5px; width: 120px;text-align: center;">
+                       :style="tagStyle"
+                       style="background-color: #5ec940b8; color: #151515;
+                       user-select: none;
+                        width: 120px;text-align: center;">
                   {{ getPath(v11).requireLogin ? 'Login Required' : 'No Login Required' }}
                 </a-tag>
                 <a-tag v-if="hasAuth(v11)"
-                       style="background-color: var(--main-color) !important; color: white;
-                       cursor: unset;margin-bottom: 5px;text-align: center;">
+                       :style="tagStyle"
+                       style="background-color: #327af6b0; color: #151515;
+                       cursor: unset;text-align: center;">
                   Auth
                 </a-tag>
+                <a-tag v-if="hasParamAuthR(v11)"
+                       :style="tagStyle"
+                       style="background-color: #afd8cab8; color: #151515;
+                       cursor: unset;text-align: center;">
+                  Parameter
+                </a-tag>
                 <a-tag v-if="hasRateLimitR(v11)"
-                       style="background-color: #ffd866 !important; color: #1a1919;
-                       cursor: unset;margin-bottom: 5px;text-align: center;">
+                       :style="tagStyle"
+                       style="background-color:#eacc6ab0; color: #151515;
+                       cursor: unset;text-align: center;">
                   RateLimit
                 </a-tag>
 
-                <a-tag @click="addParamAuth(v11)"
-                       v-if="!docs.paths[v11.path][v11.method].paramAuth && Object.keys(docs.paths[v11.path][v11.method].paramInfo).length>0"
-                       style="background-color: #61eaf6 !important; color: #151515;
-                         float: right;
-                         cursor: pointer;margin-bottom: 5px;text-align: center;">
-                  添加 【参数权限】
-                </a-tag>
                 <a-checkable-tag v-model="getPath(v11).requireLogin"
+                                 :style="tagStyle"
                                  v-if="!hasAuth(v11)&&!hasRateLimitR(v11)&&!hasRequireLogin(v11)"
-                                 @change="handleChange(v11)"
-                                 style="margin-bottom: 5px;color: #151515; float: right; width: 120px;text-align: center;">
+                                 @change="changeLogin(v11)"
+                                 style="background-color: #5ec940b8; color: #151515;float: right; width: 120px;text-align: center;">
                   添加 【登录权限】
                 </a-checkable-tag>
-                <a-tag v-if="!hasRateLimit(v11)" @click="addRateLimit(v11)"
-                       style="background-color: #efa411 !important; color: #151515;
-                       float: right;
-                       cursor: pointer;margin-bottom: 5px;text-align: center;">
-                  添加 【速率限制】
-                </a-tag>
                 <a-tag @click="addAuth(v11)" v-if="!docs.paths[v11.path][v11.method].auth"
-                         style="background-color: var(--main-color) !important; color: #151515;
+                       :style="tagStyle"
+                       style="background-color: #327af6b0; color: #151515;
                          float: right;
-                         cursor: pointer;margin-bottom: 5px;text-align: center;">
+                         cursor: pointer;text-align: center;">
                   添加 【接口权限】
+                </a-tag>
+                <a-tag v-if="!hasRateLimit(v11)" @click="addRateLimit(v11)"
+                       :style="tagStyle"
+                       style="background-color: #eacc6ab0; color: #151515;
+                       float: right;
+                       cursor: pointer;text-align: center;">
+                  添加 【速率限制】
                 </a-tag>
 
               </div>
@@ -97,8 +106,8 @@
                 </svg>
               </div>
               <div class="save save-api-per"
-                     v-if="docs.paths[v11.path][v11.method].auth"
-                     @click="saveAuth(v11)">
+                   v-if="docs.paths[v11.path][v11.method].auth"
+                   @click="saveAuth(v11)">
                   <svg class="icon" aria-hidden="true">
                     <use xlink:href="#icon-save"></use>
                   </svg>
@@ -106,6 +115,11 @@
             </div>
             <div class="card-item param-auth" v-if="hasParamAuth(v11)">
               <param-auth :path="getPath(v11)"></param-auth>
+              <div class="save save-param-auth" @click="saveParamAuth(v11)">
+                <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-save"></use>
+                </svg>
+              </div>
             </div>
             <div class="card-item ratelimit" v-if="hasRateLimit(v11)">
               <rate-limit :rate-limit="rateLimit(v11)">
@@ -154,6 +168,7 @@ export default {
   },
   data () {
     return {
+      tagStyle: 'margin-bottom: 5px;margin-left: 5px;',
       methodStyle: {
         'GET': 'background-color: rgba(97,175,254,.1);',
         'POST': 'background-color: rgba(73,204,144,.1);',
@@ -170,7 +185,10 @@ export default {
       return !!this.docs.paths[v.path][v.method].rateLimit
     },
     hasParamAuth (v) {
-      return !!this.docs.paths[v.path][v.method].paramAuth
+      return Object.keys(this.docs.paths[v.path][v.method].paramAuth).length > 0
+    },
+    hasParamAuthR (v) {
+      return this.docs.paths[v.path][v.method].hasParamAuth
     },
     hasRateLimitR (v) {
       return this.getPath(v).hasRateLimit
@@ -337,9 +355,9 @@ export default {
       })
     },
 
-    addParamAuth(v){
-      this.docs.paths[v.path][v.method].paramAuth = {}
-      this.$forceUpdate()
+    saveParamAuth(v){
+      console.log(v)
+      console.log(this.docs.paths[v.path][v.method].paramAuth)
     },
 
     changeActiveKey (key) {
@@ -531,7 +549,7 @@ export default {
 .delete {
   position: absolute;
   right: 80px;
-  bottom: 14px;
+  bottom: 10px;
   cursor: pointer;
   padding: 10px;
   background-color: #ff000099;
@@ -540,19 +558,33 @@ export default {
 }
 
 .delete-rate-limit {
-
-}
-
-.save-api-per {
-  bottom: 15px;
-}
-
-.delete-api-per {
-
+  top: 10px;
+  bottom: unset;
 }
 
 .save-rate-limit {
-  bottom: 15px;
+  top: 10px;
+  bottom: unset;
+}
+
+.save-api-per {
+  top: 63px;
+  bottom: unset;
+}
+
+.delete-api-per {
+  top: 63px;
+  bottom: unset;
+}
+
+.save-param-auth {
+  top: 10px;
+  bottom: unset;
+}
+
+.delete-param-auth {
+  top: 10px;
+  bottom: unset;
 }
 
 .ratelimit {
@@ -560,31 +592,53 @@ export default {
   user-select: none;
 }
 
-.param-auth{
+.param-auth {
   margin-top: 7px;
   user-select: none;
 }
 
-@media screen and (max-width: 765px) {
-  .save-rate-limit {
-    top: 15px;
-    bottom: unset;
-  }
-
-  .delete-rate-limit {
-    right: 18px;
-  }
-}
 
 @media screen and (max-width: 500px) {
   .save {
-    bottom: 10px;
-    right: 13px;
-    padding: 5px;
+    transform: scale(0.8);
+  }
+
+  .delete {
+    transform: scale(0.8);
   }
 
   .card-item {
     padding: 10px;
+  }
+
+  .save-api-per {
+    top: 53px;
+    bottom: unset;
+  }
+
+  .delete-api-per {
+    top: 53px;
+    bottom: unset;
+  }
+
+  .save-param-auth {
+    top: -1px;
+    bottom: unset;
+  }
+
+  .delete-param-auth {
+    top: -1px;
+    bottom: unset;
+  }
+
+  .delete-rate-limit {
+    top: -1px;
+    bottom: unset;
+  }
+
+  .save-rate-limit {
+    top: -1px;
+    bottom: unset;
   }
 }
 
