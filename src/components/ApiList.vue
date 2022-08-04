@@ -40,12 +40,12 @@
 
                 <a-checkable-tag v-model="getPath(v11).requireLogin"
                                  :style="tagStyle"
-                                 v-if="!hasAuth(v11)&&!hasRateLimitR(v11)&&hasRequireLogin(v11)"
+                                 v-if="!hasAuth(v11)&&hasRequireLogin(v11)&&!hasParamAuthR(v11)"
                                  @change="changeLogin(v11)"
                                  style="background-color: #5ec940b8; color: #151515;width: 120px;text-align: center;">
                   Login Required
                 </a-checkable-tag>
-                <a-tag v-if="hasAuth(v11)||hasRateLimitR(v11)"
+                <a-tag v-if="hasAuth(v11)||hasParamAuthR(v11)"
                        :style="tagStyle"
                        style="background-color: #5ec940b8; color: #151515;
                        user-select: none;
@@ -114,12 +114,7 @@
                 </div>
             </div>
             <div class="card-item param-auth" v-if="hasParamAuth(v11)">
-              <param-auth :path="getPath(v11)"></param-auth>
-              <div class="save save-param-auth" @click="saveParamAuth(v11)">
-                <svg class="icon" aria-hidden="true">
-                  <use xlink:href="#icon-save"></use>
-                </svg>
-              </div>
+              <param-auth :info="v11" :path="getPath(v11)"></param-auth>
             </div>
             <div class="card-item ratelimit" v-if="hasRateLimit(v11)">
               <rate-limit :rate-limit="rateLimit(v11)">
@@ -301,6 +296,7 @@ export default {
                   <div>API权限删除成功</div>
                 </div>
                 )
+                this.$set(this.docs.paths[v.path][v.method], 'requireLogin', res.data.requireLogin)
               } else {
                 this.$message.error(`删除失败，网络异常`)
               }
@@ -319,17 +315,17 @@ export default {
     saveAuth (v) {
       let auth = this.docs.paths[v.path][v.method].auth
       let data = {
-        'operate': 'update',
-        'target': 'api',
-        'method': v.method,
-        'api': v.path,
-        'role': {
-          'require': auth.requireRoles,
-          'exclude': auth.excludeRoles
+        operate: 'update',
+        target: 'api',
+        method: v.method,
+        api: v.path,
+        role: {
+          require: auth.requireRoles,
+          exclude: auth.excludeRoles
         },
-        'permission': {
-          'require': auth.requirePermissions,
-          'exclude': auth.excludePermissions
+        permission: {
+          require: auth.requirePermissions,
+          exclude: auth.excludePermissions
         }
       }
 
@@ -355,20 +351,15 @@ export default {
       })
     },
 
-    saveParamAuth(v){
-      console.log(v)
-      console.log(this.docs.paths[v.path][v.method].paramAuth)
-    },
-
     changeActiveKey (key) {
     },
     changeLogin (v) {
       let k = this.hasRequireLogin(v)
       let data = {
-        'target': 'login',
-        'method': v.method,
-        'api': v.path,
-        'value': k
+        target: 'login',
+        method: v.method,
+        api: v.path,
+        value: k
       }
 
       this.$http.post('/operate', data).then(res => {
@@ -541,7 +532,7 @@ export default {
   right: 18px;
   cursor: pointer;
   padding: 10px;
-  background-color: #e6e6e654;
+  background-color: #36c217c7;
   border-radius: 10px;
   box-shadow: var(--button-shadow-color);
 }

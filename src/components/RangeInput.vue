@@ -1,6 +1,6 @@
 <template>
   <a-input-group compact>
-    <a-select :default-value="sp" @change="change">
+    <a-select :default-value="sp" @change="change" :disabled="valueMatchType!=='range'">
       <a-select-option :value="1">
         相等
       </a-select-option>
@@ -9,8 +9,9 @@
       </a-select-option>
     </a-select>
     <a-input
-      :default-value="items[itemIndex].split('-')[0]"
+
       @blur="inputBlurMin"
+      v-model:value="v1"
       :style="sp===2?'width: 100px;':'width: 230px;'" style="text-align: center;transition: unset"
       placeholder="最小值"/>
     <a-input
@@ -20,13 +21,14 @@
       disabled
     />
     <a-input v-if="sp===2"
-             :default-value="items[itemIndex].split('-')[1]"
+             v-model:value="v2"
              @blur="inputBlurMax"
              style="width: 100px;  text-align: center;transition: unset" placeholder="最大值"/>
   </a-input-group>
 </template>
 
 <script>
+
 export default {
   name: 'RangeInput',
   props: {
@@ -35,40 +37,67 @@ export default {
     },
     itemIndex: {
       type: Number
+    },
+    valueMatchType: {
+      type: String
+    },
+    valueType: {
+      type: String
     }
   },
   data () {
     return {
       sp: 1,
-      _v1: '',
-      _v2: '',
+      v1: null,
+      v2: null,
+      int_arr: ['int', 'long', 'byte', 'biginteger'],
+      float_arr: ['double', 'float', 'bigdecimal'],
+      regex: /#{.*}/
     }
   },
   created () {
-    console.log(this.items)
+    console.log(this.valueType)
     let arr = this.items[this.itemIndex].split('-')
-    this._v1 = arr[0]
-    if (arr.length === 2) this._v2 = arr[1]
+    this.v1 = arr[0]
+    if (arr.length === 2) this.v2 = arr[1]
     this.sp = arr.length
   },
   methods: {
-    inputBlurMin (v) {
-      this._v1 = v.target.value
-      let a
-      if (this.sp === 2) {
-        a = `${this._v1}-${this._v2}`
-      } else {
-        a = `${this._v1}`
+    formatValue (val) {
+      if (this.regex.test(val)) {
+        return this.regex.exec(val)
       }
-      this.$set(this.items, this.itemIndex, a)
+      if (this.int_arr.includes(this.valueType)) {
+        let a = parseInt(val)
+        if (isNaN(a)) {
+          return 0
+        } else {
+          return a
+        }
+      } else if (this.float_arr.includes(this.valueType)) {
+        let a = parseFloat(val)
+        if (isNaN(a)) {
+          return 0
+        } else {
+          return a
+        }
+      }
+      return val
+    },
+    inputBlurMin (v) {
+      this.v1 = this.formatValue(v.target.value)
+      this.concat()
     },
     inputBlurMax (v) {
-      this._v2 = v.target.value
+      this.v2 = this.formatValue(v.target.value)
+      this.concat()
+    },
+    concat () {
       let a
       if (this.sp === 2) {
-        a = `${this._v1}-${this._v2}`
+        a = `${this.v1}-${this.v2}`
       } else {
-        a = `${this._v1}`
+        a = `${this.v1}`
       }
       this.$set(this.items, this.itemIndex, a)
     },

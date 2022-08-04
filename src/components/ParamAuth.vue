@@ -1,7 +1,7 @@
 <template>
   <div class="param-auth-page" :class="s?'compact-item':''">
     <h2><span class="compact" @click="compact">参数权限</span></h2>
-    <param-auth-value :param-info="path.paramAuth"></param-auth-value>
+    <param-auth-value :info="info" :path="path" :param-info="path.paramAuth"></param-auth-value>
   </div>
 </template>
 
@@ -12,13 +12,15 @@ export default {
   name: 'ParamAuth',
   components: { ParamAuthValue },
   props: {
+    info:{
+
+    },
     path: {
       type: Object,
       default: {
         paramInfo: {},
         paramAuth: {
-          pathVariable: {},
-          requestParam: {}
+
         }
       }
     }

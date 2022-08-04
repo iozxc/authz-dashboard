@@ -11,23 +11,32 @@
           <a-row v-else v-for="(meta,index) in v1.paramMetaList"
                  :key="'param-meta-one-auth-'+index"
                  class="param-meta-one-auth">
-             <div class="delete delete-param-meta" @click="deleteParamMeta(v1,index)">
+             <div class="delete delete-param-meta" @click="deleteParamMeta(v1,v2,index)">
                 <svg class="icon" aria-hidden="true">
                   <use xlink:href="#icon-delete"></use>
                 </svg>
               </div>
+             <div class="save save-param-meta" @click="saveParamParamMeta(v1,v2,index)">
+                <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-save"></use>
+                </svg>
+              </div>
+
              <a-col :xs="24" :sm="24" :md="13" :lg="10" :xl="10" style="text-align: center;">
                 <div class="param-inner-rr div-text-scroll">
-                  <h3>Resource</h3>
+                  <h3>Resource （ 限制 访问此资源 <span style="color: green">需要</span> 某 <span
+                    style="color: #ce7e49">身份｜权限</span> ）</h3>
                   <div v-for="(r,i) in meta.resources" :key="'resources-'+index+'-'+r+'-'+i" class="range-input">
-                   <range-input :items="meta.resources" :item-index="i"></range-input>
+                   <range-input :value-type="v1.valueType" :value-match-type="v1.valueMatchType" :items="meta.resources"
+                                :item-index="i"></range-input>
                   </div>
                   <a-button type="dashed" class="add-rr-button" @click="addResources(meta)">
                     新增
                   </a-button>
-                  <h3>Range</h3>
+                  <h3>Range （ 限制 某 <span style="color: #ce7e49">身份｜权限</span> <span style="color: red">只能</span> 访问此资源 ） </h3>
                   <div v-for="(r,i) in meta.range" :key="'range-'+index+'-'+r+'-'+i" class="range-input">
-                   <range-input :items="meta.range" :item-index="i"></range-input>
+                   <range-input :value-type="v1.valueType" :value-match-type="v1.valueMatchType" :items="meta.range"
+                                :item-index="i"></range-input>
                   </div>
                    <a-button type="dashed" class="add-rr-button" @click="addRange(meta)">
                     新增
@@ -36,7 +45,9 @@
                </a-col>
              <a-col :xs="24" :sm="24" :md="11" :lg="14" :xl="14">
                 <h3 style="text-align: center">Auth</h3>
-                <div class="param-inner-role-permissions div-text-scroll">
+                <a-row class="param-inner-role-permissions div-text-scroll">
+
+                  <a-col :xs="24" :sm="24" :md="24" :lg="24" :xl="12">
                     <h4>Roles</h4>
                     <div style="margin-left: 10px">
                       <h5>Require</h5>
@@ -44,7 +55,9 @@
                       <h5>Exclude</h5>
                       <and-or-select class="div-text-scroll" :items="meta.excludeRoles"></and-or-select>
                     </div>
+                  </a-col>
 
+                  <a-col :xs="24" :sm="24" :md="24" :lg="24" :xl="12">
                     <h4>Permissions</h4>
                     <div style="margin-left: 10px">
                       <h5>Require</h5>
@@ -52,8 +65,9 @@
                       <h5>Exclude</h5>
                       <and-or-select class="div-text-scroll" :items="meta.excludePermissions"></and-or-select>
                     </div>
+                  </a-col>
 
-                </div>
+                </a-row>
               </a-col>
           </a-row>
           <div class="param-meta-one-auth param-meta-one-auth-add" @click="addMeta(v1)">新增</div>
@@ -65,6 +79,7 @@
 <script>
 import AndOrSelect from '@/components/AndOrSelect'
 import RangeInput from '@/components/RangeInput'
+import { mapState } from 'vuex'
 
 export default {
   name: 'ParamAuthValue',
@@ -73,6 +88,8 @@ export default {
     AndOrSelect
   },
   props: {
+    info: {},
+    path:{},
     paramInfo: {
       type: Object,
       default: {
@@ -109,12 +126,76 @@ export default {
         if (!meta.excludePermissions) this.$set(meta, 'excludePermissions', [])
       }
     }
+
+    console.log(this.docs.argResource)
+  },
+  computed:{
+    ...mapState(['docs'])
   },
   methods: {
-    deleteParamMeta (v, index) {
+    saveParamParamMeta (v, paramName, index) {
+      let paramMeta = v.paramMetaList[index]
+      let data = {
+        operate: 'update',
+        target: 'parameter',
+        method: this.info.method,
+        api: this.info.path,
+        paramName,
+        index,
+        ...paramMeta
+      }
+
+      console.log(data)
+      this.$http.post('/operate', data).then(res => {
+        console.log(res)
+        if (res.code === 100) {
+          let _paramMeta = res.data
+          if (!_paramMeta.requireRoles) _paramMeta.requireRoles = []
+          if (!_paramMeta.requirePermissions) _paramMeta.requirePermissions = []
+          if (!_paramMeta.excludeRoles) _paramMeta.excludeRoles = []
+          if (!_paramMeta.excludePermissions) _paramMeta.excludePermissions = []
+          if (!_paramMeta.range) _paramMeta.range = []
+          if (!_paramMeta.resources) _paramMeta.resources = []
+          paramMeta = _paramMeta
+          this.$message.success('成功')
+        }
+
+      })
+    },
+    deleteParamMeta (v, paramName, index) {
       console.log(v)
-      console.log(index)
-      this.$delete(v.paramMetaList, index)
+      this.$confirm({
+        title: `确认删除接口 ${this.info.method} ${this.info.path} 下的 ${paramName} 的参数权限 ?`,
+        content: h => <div style="color:red;">删除后将不做权限保护</div>,
+        onOk: () => {
+          this.$delete(v.paramMetaList, index)
+
+          if (this.path.hasParamAuth) {
+            let data = {
+              operate: 'delete',
+              target: 'parameter',
+              api: this.info.path,
+              method: this.info.method,
+              index,
+              paramName
+            }
+            this.$http.post('/operate', data).then(res => {
+              if (res.code === 100) {
+                this.$message.success(
+                  <div style="margin-top: 10px">
+                  <div>参数 : {this.info.method} {this.info.path} - {paramName} </div>
+                  <div>参数权限删除成功</div>
+                </div>
+                )
+              } else {
+                this.$message.error(`删除失败，网络异常`)
+              }
+            })
+          }
+          this.$set(this.path, 'hasParamAuth', false)
+        }
+      })
+
     },
     change (v1) {
       console.log(v1)
@@ -226,13 +307,24 @@ export default {
 
 .delete {
   position: absolute;
-  right: 10px;
+  right: 55px;
   top: 10px;
   padding: 3px;
   background-color: #ff000099;
-  border-radius: 10px;
   box-shadow: 0 1px 2px rgba(185, 37, 37, 0.21);
+  border-radius: 10px;
   cursor: pointer;
+  z-index: 10;
+}
+
+.save {
+  position: absolute;
+  right: 18px;
+  cursor: pointer;
+  padding: 3px;
+  background-color: #36c217c7;
+  border-radius: 10px;
+  box-shadow: var(--button-shadow-color);
   z-index: 10;
 }
 
