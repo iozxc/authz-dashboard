@@ -296,7 +296,6 @@ export default {
             data.deviceType = this.curUser.deviceType
             data.deviceId = this.curUser.deviceId
           }
-          console.log(data)
           this.$http.post('/device/deny', data).then(res => {
             if (res.code === 100) {
               this.$message.success('成功')

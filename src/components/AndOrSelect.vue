@@ -80,8 +80,6 @@ export default {
       this.$forceUpdate()
     },
     insert (i) {
-      console.log('insert')
-      console.log(i)
       this.$set(this.items[i], 0, null)
       this.$forceUpdate()
     },

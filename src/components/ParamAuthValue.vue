@@ -244,7 +244,6 @@ export default {
       this.toSave[name] = v.paramMetaList.length - 1
     },
     addRange (v) {
-      console.log(v)
       if (!v.range) {
         this.$set(v, 'range', [])
       }

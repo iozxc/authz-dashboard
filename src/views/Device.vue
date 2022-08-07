@@ -17,7 +17,6 @@ export default {
   },
   mounted () {
     this.$http.get('/device/get-all-deny-info').then(res => {
-      console.log(res.data)
       this.blacklist = res.data
     })
   },
