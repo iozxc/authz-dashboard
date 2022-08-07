@@ -6,27 +6,33 @@
 				<img style="-webkit-user-drag: none;" src="@/assets/img/authz.png" alt="omisheep" width="120" height="40">
 			</router-link>
 		</div>
-		<div class="header-menu" v-if="user">
+		<div class="header-menu" v-if="activeId!==0">
 			<div class="menu-item hover-hand" :class="{'active':activeId===1}" @click="goDocs">
-        <svg class="icon  router-icon" style="font-size: 15px" aria-hidden="true">
+        <svg class="icon  router-icon hide"  style="font-size: 15px" aria-hidden="true">
           <use xlink:href="#icon-API"></use>
          </svg>
 				{{ trans('文档') }}
 			</div>
-			<div class="menu-item hover-hand" :class="{'active':activeId===2}" @click="goRequest">
-				<svg class="icon router-icon" style="font-size: 16px" aria-hidden="true">
-          <use xlink:href="#icon-request-map"></use>
+			<div class="menu-item hover-hand" :class="{'active':activeId===2}" @click="goDevice">
+				<svg class="icon router-icon hide" style="font-size: 16px" aria-hidden="true">
+          <use xlink:href="#icon-Devices"></use>
          </svg>
 
-        {{ trans('请求') }}
+        {{ trans('设备管理') }}
+			</div>
+      			<div class="menu-item hover-hand" :class="{'active':activeId===3}" @click="goData">
+				<svg class="icon router-icon hide" style="font-size: 16px" aria-hidden="true">
+          <use xlink:href="#icon-OpenData"></use>
+         </svg>
+
+        {{ trans('数据权限') }}
 			</div>
 		</div>
 		<div class="user-info-space">
-			<div class="user-info user-info-logout" @click="exit" v-if="user">
-        <div style="margin-bottom: 2px">{{ user }}</div>
+			<div class="user-info user-info-logout" @click="exit" v-if="activeId!==0">
 				<span style="color: #0000004f">{{ trans('退出') }}</span>
 			</div>
-			<router-link to="/login" v-if="!user">
+			<router-link to="/login" v-if="activeId===0">
 				<div class="user-info user-info-login">
 					<span class="login" style="color: rgba(255,255,255,0.75)">{{ trans('登录') }}</span>
 				</div>
@@ -38,9 +44,9 @@
 </template>
 
 <script>
-import { mapMutations, mapState } from 'vuex'
 import { removeToken } from '@/utils/token'
 import { trans } from '@/utils/tanslate'
+import axios from '_axios@0.21.4@axios'
 
 export default {
   name: 'HeaderLayout',
@@ -57,22 +63,26 @@ export default {
     window.addEventListener('scroll', this.handleScroll, true)
   },
   computed: {
-    ...mapState(['user']),
     activeId () {
       if (this.$route.path === '/') return 1
-      if (this.$route.path.startsWith('/request')) return 2
-      if (this.$route.path.startsWith('/docs')) return 3
+      if (this.$route.path.startsWith('/docs')) return 1
+      if (this.$route.path.startsWith('/device')) return 2
+      if (this.$route.path.startsWith('/data')) return 3
+      return 0
     },
   },
   methods: {
     trans,
-    ...mapMutations(['setUser']),
     goDocs () {
       this.$router.push('/').catch(err => {
       })
     },
-    goRequest () {
-      this.$router.push('/request').catch(err => {
+    goDevice () {
+      this.$router.push('/device').catch(err => {
+      })
+    },
+    goData () {
+      this.$router.push('/data').catch(err => {
       })
     },
     exit () {
@@ -82,7 +92,8 @@ export default {
       })
       this.$router.push('/login').catch(err => {
       })
-      this.setUser(null)
+      axios.get('/user/logout').then(res => {
+      })
       removeToken()
     },
     handleScroll () {
@@ -236,6 +247,37 @@ a:hover {
   display: unset;
 }
 
+@media screen and (max-width: 700px) {
+  .hide{
+    opacity: 0;
+    position: absolute;
+  }
+
+  .header-menu {
+    padding: 0;
+    margin-left: 50px;
+    font-size: 16px;
+  }
+}
+
+@media screen and (max-width: 580px) {
+
+  .header-menu {
+    padding: 0;
+    margin-left: 20px;
+    font-size: 16px;
+  }
+}
+
+@media screen and (max-width: 540px) {
+
+  .header-menu {
+    padding: 0;
+    margin-left: 0px;
+    font-size: 16px;
+  }
+}
+
 @media screen and (max-width: 500px) {
   .router-icon {
     display: none;
@@ -251,7 +293,6 @@ a:hover {
 
   .header-menu {
     padding: 0;
-    margin: auto;
     font-size: 16px;
   }
 

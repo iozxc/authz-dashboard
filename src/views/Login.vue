@@ -15,7 +15,6 @@
 </template>
 
 <script>
-import { mapMutations } from 'vuex'
 import { trans } from '@/utils/tanslate'
 import { saveToken } from '@/utils/token'
 
@@ -29,9 +28,9 @@ export default {
       ok: false
     }
   },
+  computed: {},
   methods: {
     trans,
-    ...mapMutations(['setUser']),
     doLogin () {
       if (this.waitLogin) {
         this.$message.warning(trans('等待中...'))
@@ -51,7 +50,6 @@ export default {
             message: `${trans('登录成功')}:  ${username}`,
             duration: 3
           })
-          this.setUser(res.data.username)
           saveToken(res.data.uuid)
           this.$router.push('/').catch(err => {
           })
@@ -66,7 +64,6 @@ export default {
     }
   },
   created () {
-
   }
 }
 </script>

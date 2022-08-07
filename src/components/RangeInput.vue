@@ -8,26 +8,52 @@
         范围
       </a-select-option>
     </a-select>
-    <a-input
-
+    <a-auto-complete
+      @select="selectMin"
+      :filter-option="filterOption"
       @blur="inputBlurMin"
       v-model:value="v1"
-      :style="sp===2?'width: 100px;':'width: 230px;'" style="text-align: center;transition: unset"
-      placeholder="最小值"/>
+      option-label-prop="value"
+      :style="sp===2?'width: 110px;':'width: 250px;'" style="text-align: center;transition: unset"
+      placeholder="最小值"
+      @focus="focusMin"
+      :open="focusMinV"
+    >
+      <template slot="dataSource">
+        <a-select-option v-for="opt in args" :key="'min'-opt" :value="opt.split(':')[0].trim()">
+            {{ opt }}
+        </a-select-option>
+      </template>
+    </a-auto-complete>
     <a-input
       v-if="sp===2"
       style=" width: 30px;  pointer-events: none; background-color: #fff;transition: unset"
       placeholder="-"
       disabled
     />
-    <a-input v-if="sp===2"
-             v-model:value="v2"
-             @blur="inputBlurMax"
-             style="width: 100px;  text-align: center;transition: unset" placeholder="最大值"/>
+    <a-auto-complete
+      v-if="sp===2"
+      v-model:value="v2"
+      @focus="focusMax"
+      :open="focusMaxV"
+      @select="selectMax"
+      @blur="inputBlurMax"
+      :filter-option="filterOption"
+      option-label-prop="value"
+      style="width: 110px;  text-align: center;transition: unset" placeholder="最大值"
+    >
+      <template slot="dataSource">
+        <a-select-option v-for="opt in args" :key="'max'-opt" :value="opt.split(':')[0].trim()">
+            {{ opt }}
+        </a-select-option>
+      </template>
+    </a-auto-complete>
   </a-input-group>
 </template>
 
 <script>
+
+import { mapState } from 'vuex'
 
 export default {
   name: 'RangeInput',
@@ -52,20 +78,48 @@ export default {
       v2: null,
       int_arr: ['int', 'long', 'byte', 'biginteger'],
       float_arr: ['double', 'float', 'bigdecimal'],
-      regex: /#{.*}/
+      regex: /#{.*}/,
+      selectedItems: ['x'],
+      value: '',
+      argsRaw: [],
+      focusMinV: false,
+      focusMaxV: false
     }
   },
   created () {
-    console.log(this.valueType)
     let arr = this.items[this.itemIndex].split('-')
     this.v1 = arr[0]
     if (arr.length === 2) this.v2 = arr[1]
     this.sp = arr.length
+    this.argsRaw = Object.keys(this.docs.argResource)
   },
   methods: {
+    focusMin () {
+      this.focusMinV = true
+    },
+    focusMax () {
+      this.focusMaxV = true
+    },
+    selectMin (input, option) {
+      this.v1 = input
+      this.focusMinV = false
+    },
+    selectMax (input, option) {
+      this.v2 = input
+      this.focusMaxV = false
+    },
+    filterOption (input, option) {
+      return (
+        option.componentOptions.children[0].text.toUpperCase().indexOf(input.toUpperCase()) >= 0
+      )
+    },
     formatValue (val) {
       if (this.regex.test(val)) {
-        return this.regex.exec(val)
+        let a = this.regex.exec(val)
+        let rawValue = a.input.substring(2, a.input.length - 1)
+        if (this.argsRaw.includes(rawValue.split('.')[0])) {
+          return a.input
+        }
       }
       if (this.int_arr.includes(this.valueType)) {
         let a = parseInt(val)
@@ -85,12 +139,14 @@ export default {
       return val
     },
     inputBlurMin (v) {
-      this.v1 = this.formatValue(v.target.value)
+      this.v1 = this.formatValue(`${v}`.trim())
       this.concat()
+      this.focusMinV = false
     },
     inputBlurMax (v) {
-      this.v2 = this.formatValue(v.target.value)
+      this.v2 = this.formatValue(`${v}`.trim())
       this.concat()
+      this.focusMaxV = false
     },
     concat () {
       let a
@@ -106,8 +162,12 @@ export default {
     },
 
   },
-
-  computed: {}
+  computed: {
+    ...mapState(['docs']),
+    args () {
+      return Object.keys(this.docs.argResource).map(v => `#{${v}} ${this.docs.argResource[v].description ? ': ' + this.docs.argResource[v].description : ''}`)
+    }
+  }
 
 }
 </script>

@@ -15,9 +15,7 @@
 <script>
 
 import HeaderLayout from '@/components/HeaderLayout'
-import axios from '_axios@0.21.4@axios'
-import { getToken, removeToken, saveToken } from '@/utils/token'
-import { mapMutations, mapState } from 'vuex'
+import { initTimeOut } from '@/utils/token'
 
 export default {
   name: 'App',
@@ -25,37 +23,13 @@ export default {
   data () {
     return {}
   },
-  computed: {
-    ...mapState(['checkStatus'])
-  },
-  methods: {
-    ...mapMutations(['setUser']),
-    status () {
-      if (getToken()==null) {
-        if (this.$route.path!=='/login'){
-          this.$router.push('/login')
-        }
-        return
-      }
-      axios.get(`/user/check-login`).then(res => {
-        if (res.code !== 100) {
-          removeToken()
-          this.setUser(null)
-          this.$router.push('/login')
-        }
-      })
-    }
-  },
+  computed: {},
+  methods: {},
   mounted () {
-    if (this.fuc == null) this.fuc = window.setInterval(this.status, 30000)
+    initTimeOut()
   }
 }
 </script>
 
 <style lang="less">
-//#app > .container {
-//  padding: 30px;
-//  max-width: 1460px;
-//  margin: 60px auto auto;
-//}
 </style>

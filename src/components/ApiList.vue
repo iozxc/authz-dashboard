@@ -347,6 +347,8 @@ export default {
           }
           this.$set(this.docs.paths[v.path], v.method, _path)
           this.$message.success('保存成功，已自动去重')
+        } else {
+          this.$message.error('保存失败')
         }
       })
     },

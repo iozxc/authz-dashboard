@@ -1,5 +1,6 @@
 <template>
-  <div id="index" v-if="load">
+  <div>
+    <div id="index" v-if="!load">
     <div class="info-header">Authz {{ docs.authz ? `-${docs.authz}` : '' }}</div>
     <div class="info-content">
       <h5>{{ docs.info.title }} <span class="h-inner-content">{{ docs.info.version }}</span></h5>
@@ -53,6 +54,13 @@
     <div class="info-header">Api Permissions</div>
     <api-list :docs="docs"></api-list>
   </div>
+    <div style="padding: 30px;margin: 60px auto auto;">
+      <a-skeleton v-if="load" :title="false" active/>
+      <a-skeleton v-if="load" :title="false" active/>
+      <a-skeleton v-if="load" :title="false" active/>
+    </div>
+
+  </div>
 </template>
 
 <script>
@@ -60,7 +68,7 @@ import ApiList from '@/components/ApiList'
 import { getToken } from '@/utils/token'
 import ServerCard from '@/components/ServerCard'
 import { mapMutations, mapState } from 'vuex'
-import { trans} from '@/utils/tanslate'
+import { trans } from '@/utils/tanslate'
 
 export default {
   name: 'Index',
@@ -70,11 +78,11 @@ export default {
   },
   data () {
     return {
-      load: false
+      load: true
     }
   },
   methods: {
-    ...mapMutations(['setServer','setDocs']),
+    ...mapMutations(['setServer', 'setDocs']),
     getUrl (v1, v2) {
       let i = window.location.href.indexOf(':')
       let h = window.location.href.substring(0, i)
@@ -110,7 +118,7 @@ export default {
     this.$http.get('/docs').then(res => {
       this.setDocs(res)
       this.setServer(this.docs.appVersionInfo)
-      this.load = true
+      this.load = false
     })
   }
 }
@@ -119,8 +127,8 @@ export default {
 <style lang="less" scoped>
 #index {
   padding: 30px;
-  max-width: 1460px;
   margin: 60px auto auto;
+  max-width: 1460px;
 
   .info-header {
     font-size: 25px;

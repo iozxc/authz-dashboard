@@ -11,6 +11,7 @@ import '@/utils/request.js'
 import '@/css/func.less'
 import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.min.css'
+import '@/utils/token.js'
 
 Vue.use(Antd)
 

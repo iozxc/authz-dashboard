@@ -1,17 +1,22 @@
 import axios from 'axios'
 import { trans } from '@/utils/tanslate'
 import Vue from 'vue'
-import { getToken } from '@/utils/token'
+import { cancelTestTime, getToken, removeToken } from '@/utils/token'
 import { prefix } from '@/utils/api'
 import router from '@/router'
 
 axios.interceptors.request.use(
   function (config) {
     config.baseURL = prefix
-    config.params = {
-      uuid: getToken(),
-      ...config.params
+    if (config.url === '/user/login') return config
+    if (!config.params) config.params = {}
+    if (!config.params.uuid) {
+      config.params = {
+        uuid: getToken(),
+        ...config.params
+      }
     }
+
     return config
   },
   function (error) {
@@ -28,9 +33,12 @@ axios.interceptors.response.use(
     }
   },
   function (error) {
-    Vue.prototype.$message.error(trans("token 过期, 请重新登录"))
-    Vue.prototype.$router.push('/').catch(err => {
-    })
+    if (!['#/login', '#/outline'].includes(location.hash)) {
+      router.push('/login').catch(err => {
+      })
+      cancelTestTime()
+      removeToken()
+    }
     return error.response.data
   }
 )

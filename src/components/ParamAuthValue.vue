@@ -44,7 +44,7 @@
                 </div>
                </a-col>
              <a-col :xs="24" :sm="24" :md="11" :lg="14" :xl="14">
-                <h3 style="text-align: center">Auth</h3>
+                <h3 style="text-align: center"><span style="color: #ce7e49">身份｜权限</span></h3>
                 <a-row class="param-inner-role-permissions div-text-scroll">
 
                   <a-col :xs="24" :sm="24" :md="24" :lg="24" :xl="12">
@@ -70,7 +70,7 @@
                 </a-row>
               </a-col>
           </a-row>
-          <div class="param-meta-one-auth param-meta-one-auth-add" @click="addMeta(v1)">新增</div>
+          <div v-if="!toSave[v2]" class="param-meta-one-auth param-meta-one-auth-add" @click="addMeta(v1,v2)">新增</div>
         </a-tab-pane>
       </a-tabs>
   </div>
@@ -89,7 +89,7 @@ export default {
   },
   props: {
     info: {},
-    path:{},
+    path: {},
     paramInfo: {
       type: Object,
       default: {
@@ -106,7 +106,9 @@ export default {
     }
   },
   data () {
-    return {}
+    return {
+      toSave: {}
+    }
   },
   created () {
     for (let i in this.paramInfo) {
@@ -126,14 +128,16 @@ export default {
         if (!meta.excludePermissions) this.$set(meta, 'excludePermissions', [])
       }
     }
-
-    console.log(this.docs.argResource)
   },
-  computed:{
-    ...mapState(['docs'])
-  },
+  computed: {},
   methods: {
     saveParamParamMeta (v, paramName, index) {
+
+      if (index !== this.toSave[paramName] && this.toSave[paramName]) {
+        this.$message.warning('还有未保存的配置')
+        return
+      }
+
       let paramMeta = v.paramMetaList[index]
       let data = {
         operate: 'update',
@@ -145,10 +149,14 @@ export default {
         ...paramMeta
       }
 
-      console.log(data)
       this.$http.post('/operate', data).then(res => {
-        console.log(res)
         if (res.code === 100) {
+          if (this.toSave[paramName]) {
+            if (index === this.toSave[paramName]) {
+              this.$delete(this.toSave, paramName)
+            }
+          }
+
           let _paramMeta = res.data
           if (!_paramMeta.requireRoles) _paramMeta.requireRoles = []
           if (!_paramMeta.requirePermissions) _paramMeta.requirePermissions = []
@@ -157,17 +165,33 @@ export default {
           if (!_paramMeta.range) _paramMeta.range = []
           if (!_paramMeta.resources) _paramMeta.resources = []
           paramMeta = _paramMeta
+          this.$set(v.paramMetaList, index, paramMeta)
           this.$message.success('成功')
+        } else {
+          paramMeta = {
+            requireRoles: [],
+            requirePermissions: [],
+            excludeRoles: [],
+            excludePermissions: [],
+            range: [],
+            resources: []
+          }
+          this.$set(v.paramMetaList, index, paramMeta)
         }
 
       })
     },
     deleteParamMeta (v, paramName, index) {
-      console.log(v)
       this.$confirm({
         title: `确认删除接口 ${this.info.method} ${this.info.path} 下的 ${paramName} 的参数权限 ?`,
         content: h => <div style="color:red;">删除后将不做权限保护</div>,
         onOk: () => {
+          if (this.toSave[paramName]) {
+            if (index === this.toSave[paramName]) {
+              this.$delete(this.toSave, paramName)
+            }
+          }
+
           this.$delete(v.paramMetaList, index)
 
           if (this.path.hasParamAuth) {
@@ -192,15 +216,21 @@ export default {
               }
             })
           }
+
           this.$set(this.path, 'hasParamAuth', false)
+
         }
       })
 
     },
     change (v1) {
-      console.log(v1)
     },
-    addMeta (v) {
+    addMeta (v, name) {
+      if (this.toSave[name]) {
+        this.$message.warning('还有未保存的配置')
+        return
+      }
+
       if (!v.paramMetaList) {
         this.$set(v, 'paramMetaList', [])
       }
@@ -210,6 +240,8 @@ export default {
         excludePermissions: [],
         requirePermissions: []
       })
+
+      this.toSave[name] = v.paramMetaList.length - 1
     },
     addRange (v) {
       console.log(v)
