@@ -1,7 +1,7 @@
 <template>
   <div id="api-list">
       <a-collapse @change="changeActiveKey">
-      <a-collapse-panel v-for="(v1,v2, index1) in docs.controllers" :key="index1"
+      <a-collapse-panel v-for="(v1, v2, index1) in docs.controllers" :key="index1"
                         :show-arrow="false"
                         style="background: rgb(247, 247, 247);border-radius: 4px;margin-bottom: 4px;">
         <span slot="header">
@@ -13,6 +13,17 @@
             </span>
           </a-badge>
         </span>
+        <a-collapse @change="changeActiveKey">
+          <a-collapse-panel  :show-arrow="false" style="background-color: rgb(228 231 230 / 31%);margin-bottom: 10px;">
+            <span slot="header" class="collapse-header" style="text-align: center;display: inline-block;font-size: 20px;font-weight: 500;width: 100%;">
+              Controller权限
+              <svg class="icon" aria-hidden="true" v-if="hasControllerPermissions(v2)">
+                  <use xlink:href="#icon-shenfenshibierenzheng"></use>
+                </svg>
+            </span>
+            <controller-perm :name="v2"></controller-perm>
+          </a-collapse-panel>
+        </a-collapse>
         <a-collapse @change="changeActiveKey">
           <a-collapse-panel :key="index1+'-'+index2" v-for="(v11,index2) in v1" :show-arrow="false"
                             style="margin-bottom: 15px" :style="methodStyle[v11.method]">
@@ -33,7 +44,6 @@
                   <use xlink:href="#icon-param"></use>
                 </svg>
               </div>
-
             </div>
             <div style="position: relative">
               <div class="p-tags">
@@ -97,7 +107,7 @@
               <card class="card-item"
                     v-if="docs.paths[v11.path][v11.method].auth"
                     :path="docs.paths[v11.path][v11.method]">
-                </card>
+              </card>
               <div class="delete delete-api-per"
                    v-if="docs.paths[v11.path][v11.method].auth"
                    @click="deleteAuth(v11)">
@@ -141,10 +151,12 @@
 import Card from '@/components/Card'
 import RateLimit from '@/components/RateLimit'
 import ParamAuth from '@/components/ParamAuth'
+import ControllerPerm from '@/components/ControllerPerm'
 
 export default {
   name: 'ApiList',
   components: {
+    ControllerPerm,
     ParamAuth,
     RateLimit,
     Card
@@ -199,6 +211,10 @@ export default {
     },
     getPath (v) {
       return this.docs.paths[v.path][v.method]
+    },
+    hasControllerPermissions(v){
+      console.log(this.docs.controllerPermissions)
+      return this.docs.controllerPermissions[v] && this.docs.controllerPermissions[v].hasAuth
     },
 
     deleteRateLimit (v) {
@@ -496,7 +512,6 @@ export default {
 
     .api-path {
       margin-left: 10px;
-      //line-height: 34px;
       vertical-align: middle;
       text-align: center;
       font-size: 12px;
